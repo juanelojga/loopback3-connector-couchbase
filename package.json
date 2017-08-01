@@ -7,27 +7,24 @@
   },
   "main": "index.js",
   "scripts": {
-    "lint": "eslint .",
-    "test": "mocha --timeout 10000 --require test/init.js test/*.js",
-    "posttest": "npm run lint"
+    "test": "mocha -R spec --timeout 10000 --require test/init.js test/*.test.js"
   },
   "dependencies": {
-    "async": "^0.9.0",
-    "debug": "^2.1.1",
+    "async": "^2.3.0",
+    "debug": "^2.2.0",
     "lodash": "^4.17.4",
     "loopback-connector": "^4.0.0",
     "couchbase": "^2.3.5",
-    "strong-globalize": "^2.5.8"
+    "strong-globalize": "^2.8.2"
   },
   "devDependencies": {
-    "bluebird": "~2.9.10",
-    "eslint": "^4.3.0",
-    "eslint-config-loopback": "^8.0.0",
-    "loopback-datasource-juggler": "^3.0.0",
-    "mocha": "^2.1.0",
-    "rc": "^1.0.0",
-    "should": "^8.0.2",
-    "sinon": "^1.15.4"
+    "bluebird": "^3.5.0",
+    "loopback-datasource-juggler": "^3.9.3",
+    "mocha": "^3.2.0",
+    "rc": "^1.1.0",
+    "should": "^11.2.1",
+    "sinon": "^2.1.0",
+    "uuid": "^3.0.1"
   },
   "repository": {
     "type": "git",
