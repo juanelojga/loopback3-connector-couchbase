@@ -12,10 +12,10 @@ ENV PASSWORD "password"
 ENV CLUSTER_HOST ""
 ENV CLUSTER_REBALANCE ""
 
-ENV BUCKET_NAME "loopback-connector"
+ENV BUCKET_NAME "loopback"
 
 COPY config-couchbase.sh /config-entrypoint.sh
-
-ADD test/data /
+COPY test/data/countries.zip /
+COPY test/data/userprofiles.zip /
 
 ENTRYPOINT ["/config-entrypoint.sh"]

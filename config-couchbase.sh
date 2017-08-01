@@ -107,17 +107,11 @@ couchbase-cli bucket-create -c ${HOSTNAME}:8091 \
   --bucket-replica=1 \
   --bucket-priority=high \
   --bucket-eviction-policy=valueOnly \
-  --conflict-resolution=timestamp \
   -u ${USERNAME} -p ${PASSWORD}
 
 # Add testing data
-cbdocloader ­-n ${HOSTNAME}:8091 \
-  -u ${USERNAME} -p ${PASSWORD} \
-  -b ${BUCKET_NAME} -­s 512 userprofiles.zip
-
-cbdocloader ­-n ${HOSTNAME}:8091 \
-  -u ${USERNAME} -p ${PASSWORD} \
-  -b ${BUCKET_NAME} -­s 512 countries.zip
+#cbdocloader ­-u ${USERNAME} -p ${PASSWORD} -n ${HOSTNAME}:8091 -b ${BUCKET_NAME} userprofiles.zip
+#cbdocloader ­-u ${USERNAME} -p ${PASSWORD} -n ${HOSTNAME}:8091 -b ${BUCKET_NAME} countries.zip
 
 # Attach to couchbase entrypoint
 numbered_echo "Attaching to couchbase-server entrypoint"
