@@ -21,7 +21,7 @@ const connectorCapabilities = {
 };
 
 module.exports = {
-	config,
+  config,
   getDataSource,
   connectorCapabilities
 };
