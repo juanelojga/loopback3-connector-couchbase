@@ -5,7 +5,7 @@ const DataSource = require('loopback-datasource-juggler').DataSource;
 const config = require('rc')('loopback', {test: {couchbase: {
   host: process.env.COUCHBASE_HOST || 'localhost',
   port: process.env.COUCHBASE_PORT || 8091,
-  bucket: process.env.COUCHBASE_BUCKET || 'loopback',
+  bucket: process.env.COUCHBASE_BUCKET || 'loopback-test',
   password : process.env.COUCHBASE_PASSWORD || ''
 }}}).test.couchbase;
 
