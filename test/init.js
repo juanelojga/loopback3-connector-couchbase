@@ -1,37 +1,27 @@
 'use strict';
 
-module.exports = require('should');
-
 const DataSource = require('loopback-datasource-juggler').DataSource;
 
-const config = require('rc')('loopback', {test: {mysql: {}}}).test.mysql;
-console.log(config);
-global.getConfig = function(options) {
-  var dbConf = {
-    host: process.env.MYSQL_HOST || config.host || 'localhost',
-    port: process.env.MYSQL_PORT || config.port || 3306,
-    database: process.env.MYSQL_DATABASE || 'myapp_test',
-    username: process.env.MYSQL_USER || config.username,
-    password: process.env.MYSQL_PASSWORD || config.password,
-    createDatabase: true,
-  };
+const config = require('rc')('loopback', {test: {couchbase: {
+  host: process.env.COUCHBASE_HOST || 'localhost',
+  port: process.env.COUCHBASE_PORT || 8091,
+  bucket: process.env.COUCHBASE_BUCKET || 'loopback',
+  password : process.env.COUCHBASE_PASSWORD || ''
+}}}).test.couchbase;
 
-  if (options) {
-    for (var el in options) {
-      dbConf[el] = options[el];
-    }
-  }
-  return dbConf;
-};
-
-global.getDataSource = global.getSchema = function(options) {
-  var db = new DataSource(require('../'), global.getConfig(options));
+const getDataSource = function() {
+  const db = new DataSource(require('../'), config);
   return db;
 };
 
-global.connectorCapabilities = {
+const connectorCapabilities = {
   ilike: false,
   nilike: false,
+  nestedProperty: true,
 };
 
-global.sinon = require('sinon');
+module.exports = {
+  config,
+  getDataSource,
+  connectorCapabilities
+};
