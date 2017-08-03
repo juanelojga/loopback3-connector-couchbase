@@ -1,6 +1,7 @@
 'use strict';
 
 const assert = require('assert');
+const should = require('should');
 
 const initialization = require("./init.js");
 const exampleData = require("./exampleData.js");
@@ -26,7 +27,7 @@ describe('couchbase test cases', function() {
         if (err) {
           console.log('Error: ', err);
         }
-        console.log('Response: ', res);
+        console.log('Response: ', res.id);
         done();
       })
     });
