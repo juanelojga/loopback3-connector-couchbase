@@ -5,13 +5,15 @@ const countries = [
     'gdp': 40214,
     'countryCode': 'AD',
     'name': 'Andorra',
-    'population': 80792
+    'population': 80792,
+    'updatedAt': '1987-10-01T07:35:13'
    },
    {
     'gdp': 13448,
     'countryCode': 'HR',
     'name': 'Croatia',
-    'population': 4254921.0
+    'population': 4254921.0,
+    'updatedAt': '2006-01-02T15:04:05.567+08:00'
   }
 ];
 
