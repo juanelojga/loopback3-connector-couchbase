@@ -115,10 +115,6 @@ couchbase-cli bucket-create -c ${HOSTNAME}:8091 \
   --enable-flush=1 \
   -u ${USERNAME} -p ${PASSWORD}
 
-# Add testing data
-#cbdocloader ­-u ${USERNAME} -p ${PASSWORD} -n ${HOSTNAME}:8091 -b ${BUCKET_NAME} userprofiles.zip
-#cbdocloader ­-u ${USERNAME} -p ${PASSWORD} -n ${HOSTNAME}:8091 -b ${BUCKET_NAME} countries.zip
-
 # Attach to couchbase entrypoint
 numbered_echo "Attaching to couchbase-server entrypoint"
 fg 1

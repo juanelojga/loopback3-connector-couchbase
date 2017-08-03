@@ -11,11 +11,12 @@
   },
   "dependencies": {
     "async": "^2.3.0",
+    "couchbase": "^2.3.5",
     "debug": "^2.2.0",
     "lodash": "^4.17.4",
     "loopback-connector": "^4.0.0",
-    "couchbase": "^2.3.5",
-    "strong-globalize": "^2.8.2"
+    "strong-globalize": "^2.8.2",
+    "uuid": "^3.1.0"
   },
   "devDependencies": {
     "bluebird": "^3.5.0",
