@@ -96,9 +96,12 @@ describe('couchbase test cases', function() {
       let newCountry = _.omit(countries[2], 'population');
       country.updateAttributes(newCountry, function(err, res) {
         should.not.exists(err);
+        // TODO: Return updated instance
         done();
       })
-    })
+    });
+
+    // TODO: should not allow to update docId, id and modelName fields
   });
 });
 
