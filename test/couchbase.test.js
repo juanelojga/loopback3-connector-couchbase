@@ -63,6 +63,7 @@ describe('couchbase test cases', function() {
       COUNTRY_MODEL_WITH_ID.create(newCountry, function(err, res) {
         should.not.exists(err);
         assert.equal(res.id, id);
+        verifyCountryRows(err, res);
         done();
       });
     });
@@ -74,6 +75,7 @@ describe('couchbase test cases', function() {
       COUNTRY_MODEL_WITH_ID.create(newCountry, function(err, res) {
         should.not.exists(err);
         should.exist(res && res.id);
+        verifyCountryRows(err, res);
         done();
       });
     });
