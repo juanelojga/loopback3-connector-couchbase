@@ -37,7 +37,8 @@ done
 echo "# Couchbase Server Online"
 echo "# Starting setup process"
 
-HOSTNAME=`hostname -f`
+#HOSTNAME=`hostname -f`
+HOSTNAME="127.0.0.1"
 
 # Reset steps
 i=1
@@ -50,7 +51,7 @@ curl --silent "http://${HOSTNAME}:8091/nodes/self/controller/settings" \
 numbered_echo "Setting hostname"
 curl --silent "http://${HOSTNAME}:8091/node/controller/rename" \
   -d hostname=${HOSTNAME}
-
+  
 if [[ ${CLUSTER_HOST} ]];then
   numbered_echo "Joining cluster ${CLUSTER_HOST}"
   curl --silent -u ${USERNAME}:${PASSWORD} \
@@ -91,6 +92,11 @@ else
     -d username=${USERNAME} \
     -d password=${PASSWORD} > /dev/null
 
+  numbered_echo "Setting indexer storage method"
+  curl --silent -X POST "http://${HOSTNAME}:8091/settings/indexes" \
+    -u ${USERNAME}:${PASSWORD} \
+    -d "storageMode=${INDEX_STORAGE_MODE}"
+
 fi
 
 # Remove the bucket
@@ -102,16 +108,12 @@ couchbase-cli bucket-delete -c ${HOSTNAME}:8091 \
 couchbase-cli bucket-create -c ${HOSTNAME}:8091 \
   --bucket=${BUCKET_NAME} \
   --bucket-type=couchbase \
-  --bucket-port=11222 \
-  --bucket-ramsize=200 \
-  --bucket-replica=1 \
+  --bucket-ramsize=${BUCKET_RAM_SIZE} \
+  --bucket-replica=0 \
   --bucket-priority=high \
   --bucket-eviction-policy=valueOnly \
+  --enable-flush=1 \
   -u ${USERNAME} -p ${PASSWORD}
-
-# Add testing data
-#cbdocloader ­-u ${USERNAME} -p ${PASSWORD} -n ${HOSTNAME}:8091 -b ${BUCKET_NAME} userprofiles.zip
-#cbdocloader ­-u ${USERNAME} -p ${PASSWORD} -n ${HOSTNAME}:8091 -b ${BUCKET_NAME} countries.zip
 
 # Attach to couchbase entrypoint
 numbered_echo "Attaching to couchbase-server entrypoint"
