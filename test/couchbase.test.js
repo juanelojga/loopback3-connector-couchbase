@@ -32,7 +32,7 @@ describe('couchbase test cases', function() {
     done();
   });
 
-  describe('create model', function() {
+  describe('create document', function() {
     function verifyCountryRows(err, m) {
       should.not.exists(err);
       should.exist(m && m.id);
@@ -48,14 +48,14 @@ describe('couchbase test cases', function() {
       m.updatedAt.should.be.type('object');
     }
 
-    it('create a model and generate an id', function(done) {
+    it('create a document and generate an id', function(done) {
       COUNTRY_MODEL.create(countries[0], function(err, res) {
         verifyCountryRows(err, res);
         done();
       });
     });
 
-    it('create a model that has an id defined', function(done) {
+    it('create a document that has an id defined', function(done) {
       const id = uuid();
 
       let newCountry = _.omit(countries[0]);
@@ -68,7 +68,7 @@ describe('couchbase test cases', function() {
       });
     });
 
-    it('create a model that has an id defined but empty', function(done) {
+    it('create a document that has an id defined but empty', function(done) {
       const id = uuid();
 
       let newCountry = _.omit(countries[0]);
@@ -79,6 +79,26 @@ describe('couchbase test cases', function() {
         done();
       });
     });
+  });
+
+  describe('update document', function() {
+    let country, countryId;
+
+    before(function(done) {
+      COUNTRY_MODEL.create(countries[1], function(err, res) {
+        country = res;
+        countryId = 'COUNTRY_MODEL::' + res.id;
+        done();
+      })
+    });
+
+    it('update a document', function(done) {
+      let newCountry = _.omit(countries[2], 'population');
+      country.updateAttributes(newCountry, function(err, res) {
+        should.not.exists(err);
+        done();
+      })
+    })
   });
 });
 
