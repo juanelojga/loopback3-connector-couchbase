@@ -102,6 +102,14 @@ describe('couchbase test cases', function() {
     });
 
     // TODO: should not allow to update docId, id and modelName fields
+    it('upsert a document', function(done) {
+      let newCountry = _.omit(countries[2], 'population');
+      country.save(newCountry, function(err, res) {
+        should.not.exists(err);
+        // TODO: Return updated instance
+        done();
+      })
+    });
   });
 });
 
