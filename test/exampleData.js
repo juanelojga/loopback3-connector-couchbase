@@ -14,6 +14,13 @@ const countries = [
     'name': 'Croatia',
     'population': 4254921.0,
     'updatedAt': '2006-01-02T15:04:05.567+08:00'
+  },
+  {
+    'gdp': 65223,
+    'countryCode': 'EC',
+    'name': 'Ecuador',
+    'population': 16202365,
+    'updatedAt': '1990-05-06T00:04:05.567+08:00'
   }
 ];
 
