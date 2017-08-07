@@ -32,8 +32,7 @@ describe('couchbase test cases', function() {
     done();
   });
 
-  describe('create document', function() {
-    function verifyCountryRows(err, m) {
+  function verifyCountryRows(err, m) {
       should.not.exists(err);
       should.exist(m && m.id);
       should.exist(m && m.gdp);
@@ -48,6 +47,7 @@ describe('couchbase test cases', function() {
       m.updatedAt.should.be.type('object');
     }
 
+  describe('create document', function() {
     it('create a document and generate an id', function(done) {
       COUNTRY_MODEL.create(countries[0], function(err, res) {
         verifyCountryRows(err, res);
@@ -84,8 +84,8 @@ describe('couchbase test cases', function() {
   describe('update document', function() {
     let country, countryId;
 
-    before(function(done) {
-      COUNTRY_MODEL.create(countries[1], function(err, res) {
+    beforeEach(function(done) {
+      COUNTRY_MODEL_WITH_ID.create(countries[1], function(err, res) {
         country = res;
         countryId = 'COUNTRY_MODEL::' + res.id;
         done();
@@ -96,20 +96,38 @@ describe('couchbase test cases', function() {
       let newCountry = _.omit(countries[2], 'population');
       country.updateAttributes(newCountry, function(err, res) {
         should.not.exists(err);
-        // TODO: Return updated instance
+        should.exist(res && res.id);
+        verifyCountryRows(err, res);
         done();
       })
     });
 
-    // TODO: should not allow to update docId, id and modelName fields
     it('upsert a document', function(done) {
-      let newCountry = _.omit(countries[2], 'population');
-      country.save(newCountry, function(err, res) {
-        should.not.exists(err);
-        // TODO: Return updated instance
+      //let newCountry = _.omit(countries[2], ['gdp', 'population']);
+      let newCountry = new COUNTRY_MODEL_WITH_ID(countries[2]);
+      should.not.exist(newCountry.id);
+      newCountry.save(function(err, instance) {
+        should.exist(instance.id);
+        should.exist(newCountry.id);
+        //verifyCountryRows(err, instance);
         done();
-      })
+      });
     });
+
+    // TODO: find an object by id an update id
+    // Person.findOne(function(err, p) {
+        //   if (err) return done(err);
+        //   p.name = 'Hans';
+        //   p.save(function(err) {
+        //     if (err) return done(err);
+        //     p.name.should.equal('Hans');
+        //     Person.findOne(function(err, p) {
+        //       if (err) return done(err);
+        //       p.name.should.equal('Hans');
+        //       done();
+        //     });
+        //   });
+        // });
   });
 });
 
