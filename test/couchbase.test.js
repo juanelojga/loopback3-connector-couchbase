@@ -152,13 +152,32 @@ describe('couchbase test cases', function() {
   });
 
   describe('find document', function() {
-
     it('find all instances without filter', function(done) {
       COUNTRY_MODEL_WITH_ID.create(countries[0], function(err, country) {
         COUNTRY_MODEL_WITH_ID.create(countries[1], function(err, country) {
           COUNTRY_MODEL_WITH_ID.find(function(err, response) {
             should.not.exist(err);
             response.length.should.be.aboveOrEqual(2);
+            done();
+          });
+        });
+      });
+    });
+
+    it('find one instance with limit and skip', function(done) {
+      COUNTRY_MODEL_WITH_ID.create(countries[0], function(err, country) {
+        COUNTRY_MODEL_WITH_ID.create(countries[1], function(err, country) {
+          COUNTRY_MODEL_WITH_ID.find({limit: 1, offset: 0}, function(err, response) {
+            should.not.exist(err);
+            console.log(response);
+            response.length.should.be.equal(1);
+            done();
+          });
+
+          COUNTRY_MODEL_WITH_ID.find({limit: 1, offset: 1}, function(err, response) {
+            should.not.exist(err);
+            console.log(response);
+            response.length.should.be.equal(1);
             done();
           });
         });
