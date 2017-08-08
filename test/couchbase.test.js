@@ -5,6 +5,12 @@ const should = require('should');
 const uuid = require('uuid/v4');
 const _ = require('lodash');
 
+// TODO: Replace with deleteAll method
+const couchbase = require('couchbase');
+const cluster = new couchbase.Cluster('localhost:8091');
+const n1qlQuery = couchbase.N1qlQuery;
+// End of couchbase
+
 const initialization = require("./init.js");
 const exampleData = require("./exampleData.js");
 
@@ -29,7 +35,20 @@ describe('couchbase test cases', function() {
       population: Number,
       updatedAt: Date
     });
-    done();
+
+    // TODO: Replace with deleteAll method
+      const query = n1qlQuery.fromString('DELETE FROM `loopback-test`');
+      const bucket = cluster.openBucket('loopback-test', function(err) {
+        if (err) {
+          console.log(err);
+        }
+        bucket.query(query, [], function(err, rows) {
+          if(err) {
+            console.log(err);
+          }
+          done();
+        });
+      });
   });
 
   function verifyCountryRows(err, m) {
@@ -85,11 +104,13 @@ describe('couchbase test cases', function() {
     let country, countryId;
 
     beforeEach(function(done) {
-      COUNTRY_MODEL_WITH_ID.create(countries[1], function(err, res) {
-        country = res;
-        countryId = 'COUNTRY_MODEL::' + res.id;
-        done();
-      })
+      setTimeout(function() {
+        COUNTRY_MODEL_WITH_ID.create(countries[1], function(err, res) {
+          country = res;
+          countryId = 'COUNTRY_MODEL::' + res.id;
+          done();
+        })
+      }, 3000);
     });
 
     it('update a document', function(done) {
@@ -128,5 +149,20 @@ describe('couchbase test cases', function() {
         //     });
         //   });
         // });
+  });
+
+  describe('find document', function() {
+
+    it('find all instances without filter', function(done) {
+      COUNTRY_MODEL_WITH_ID.create(countries[0], function(err, country) {
+        COUNTRY_MODEL_WITH_ID.create(countries[1], function(err, country) {
+          COUNTRY_MODEL_WITH_ID.find(function(err, response) {
+            should.not.exist(err);
+            response.length.should.be.aboveOrEqual(2);
+            done();
+          });
+        });
+      });
+    });
   });
 });
