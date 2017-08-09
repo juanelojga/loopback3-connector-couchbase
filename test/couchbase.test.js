@@ -26,6 +26,8 @@ describe('couchbase test cases', function() {
       name: String,
       population: Number,
       updatedAt: Date
+    }, {
+      forceId: false
     });
     COUNTRY_MODEL_WITH_ID = db.define('COUNTRY_MODEL_WITH_ID', {
       id: { type: String, id: true },
@@ -36,19 +38,9 @@ describe('couchbase test cases', function() {
       updatedAt: Date
     });
 
-    // TODO: Replace with deleteAll method
-      const query = n1qlQuery.fromString('DELETE FROM `loopback-test`');
-      const bucket = cluster.openBucket('loopback-test', function(err) {
-        if (err) {
-          console.log(err);
-        }
-        bucket.query(query, [], function(err, rows) {
-          if(err) {
-            console.log(err);
-          }
-          done();
-        });
-      });
+    deleteAllModelInstances();
+
+    done();
   });
 
   function verifyCountryRows(err, m) {
@@ -169,19 +161,36 @@ describe('couchbase test cases', function() {
         COUNTRY_MODEL_WITH_ID.create(countries[1], function(err, country) {
           COUNTRY_MODEL_WITH_ID.find({limit: 1, offset: 0}, function(err, response) {
             should.not.exist(err);
-            console.log(response);
+            console.log('limit',response);
             response.length.should.be.equal(1);
-            done();
-          });
-
-          COUNTRY_MODEL_WITH_ID.find({limit: 1, offset: 1}, function(err, response) {
-            should.not.exist(err);
-            console.log(response);
-            response.length.should.be.equal(1);
-            done();
+          
+            COUNTRY_MODEL_WITH_ID.find({limit: 1, offset: 1}, function(err, response) {
+              should.not.exist(err);
+              console.log('offset',response);
+              response.length.should.be.equal(1);
+              done();
+            });
           });
         });
       });
     });
   });
+
+  function deleteAllModelInstances() {
+    const query = n1qlQuery.fromString('DELETE FROM `loopback-test`');
+    const bucket = cluster.openBucket('loopback-test', function(err) {
+      if (err) {
+        console.log(err);
+      }
+      bucket.query(query, [], function(err, rows) {
+        if(err) {
+          console.log(err);
+        }
+      });
+    });
+  }
+
+  after(function() {
+    return deleteAllModelInstances();
+  })
 });
