@@ -143,8 +143,7 @@ describe('couchbase test cases', function() {
 
   describe('find document', function() {
     beforeEach(function(done) {
-      deleteAllModelInstances();
-      done();
+      COUNTRY_MODEL_WITH_ID.destroyAll(done);
     });
 
     it('find all instances without filter', function(done) {
@@ -152,7 +151,7 @@ describe('couchbase test cases', function() {
         COUNTRY_MODEL_WITH_ID.create(countries[1], function(err, country) {
           COUNTRY_MODEL_WITH_ID.find(function(err, response) {
             should.not.exist(err);
-            response.length.should.be.aboveOrEqual(2);
+            response.length.should.be.equal(2);
             done();
           });
         });
@@ -180,22 +179,7 @@ describe('couchbase test cases', function() {
   });
 
   function deleteAllModelInstances() {
-    // TODO: Replace with deleteAll method
-    const query = n1qlQuery.fromString('DELETE FROM `loopback-test`');
-    return new Promise(function(resolve, reject) {
-      const bucket = cluster.openBucket('loopback-test', function(err) {
-        if (err) {
-          reject(err);
-        }
-        bucket.query(query, [], function(err, rows) {
-          if(err) {
-            reject(err);
-          } else {
-            resolve();
-          }
-        });
-      });
-    });
+
   }
 
   after(function() {
