@@ -96,13 +96,11 @@ describe('couchbase test cases', function() {
     let country, countryId;
 
     beforeEach(function(done) {
-      setTimeout(function() {
         COUNTRY_MODEL_WITH_ID.create(countries[1], function(err, res) {
           country = res;
           countryId = 'COUNTRY_MODEL::' + res.id;
           done();
         })
-      }, 3000);
     });
 
     it('update a document', function(done) {
@@ -144,6 +142,11 @@ describe('couchbase test cases', function() {
   });
 
   describe('find document', function() {
+    beforeEach(function(done) {
+      deleteAllModelInstances();
+      done();
+    });
+
     it('find all instances without filter', function(done) {
       COUNTRY_MODEL_WITH_ID.create(countries[0], function(err, country) {
         COUNTRY_MODEL_WITH_ID.create(countries[1], function(err, country) {
@@ -177,20 +180,25 @@ describe('couchbase test cases', function() {
   });
 
   function deleteAllModelInstances() {
+    // TODO: Replace with deleteAll method
     const query = n1qlQuery.fromString('DELETE FROM `loopback-test`');
-    const bucket = cluster.openBucket('loopback-test', function(err) {
-      if (err) {
-        console.log(err);
-      }
-      bucket.query(query, [], function(err, rows) {
-        if(err) {
-          console.log(err);
+    return new Promise(function(resolve, reject) {
+      const bucket = cluster.openBucket('loopback-test', function(err) {
+        if (err) {
+          reject(err);
         }
+        bucket.query(query, [], function(err, rows) {
+          if(err) {
+            reject(err);
+          } else {
+            resolve();
+          }
+        });
       });
     });
   }
 
   after(function() {
-    return deleteAllModelInstances();
+    //return deleteAllModelInstances();
   })
 });
