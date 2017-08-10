@@ -195,6 +195,56 @@ describe('couchbase test cases', function() {
         });
       });
     });
+
+    it('should allow to find using equal', function(done) {
+      CountryModel.create({name: 'Ecuador', countryCode: 'EC'}, function(err, country) {
+        CountryModel.find({where: {name: 'Ecuador'}}, function(err, response) {
+          should.not.exists(err);
+          response.should.have.property('length',1);
+          done();
+        });
+      });
+    });
+
+    it('should allow to find using like', function(done) {
+      CountryModel.create({name: 'Ecuador', countryCode: 'EC'}, function(err, country) {
+        CountryModel.find({where: {name: {like: 'E%or'}}}, function(err, response) {
+          should.not.exists(err);
+          response.should.have.property('length',1);
+          done();
+        });
+      });
+    });
+
+    it('should support like for no match', function(done) {
+      CountryModel.create({name: 'Ecuador', countryCode: 'EC'}, function(err, country) {
+        CountryModel.find({where: {name: {like: 'M%or'}}}, function(err, response) {
+          should.not.exists(err);
+          response.should.have.property('length',0);
+          done();
+        });
+      });
+    });
+
+    it('should allow to find using nlike', function(done) {
+      CountryModel.create({name: 'Ecuador', countryCode: 'EC'}, function(err, country) {
+        CountryModel.find({where: {name: {nlike: 'E%or'}}}, function(err, response) {
+          should.not.exists(err);
+          response.should.have.property('length',0);
+          done();
+        });
+      });
+    });
+
+    it('should support nlike for no match', function(done) {
+      CountryModel.create({name: 'Ecuador', countryCode: 'EC'}, function(err, country) {
+        CountryModel.find({where: {name: {nlike: 'M%or'}}}, function(err, response) {
+          should.not.exists(err);
+          response.should.have.property('length',1);
+          done();
+        });
+      });
+    });
   });
 
   function deleteAllModelInstances() {
