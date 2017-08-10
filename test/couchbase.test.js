@@ -410,7 +410,7 @@ describe('couchbase test cases', function() {
       });
     });
 
-    /*describe('findById method', function() {
+    describe('findById method', function() {
       let defaultCountry = _.omit(exampleData.countries[1]);
 
       it('should return one document', function(done) {
@@ -433,7 +433,7 @@ describe('couchbase test cases', function() {
           });
         });
       });
-    });*/
+    });
   });
 
   function deleteAllModelInstances() {
