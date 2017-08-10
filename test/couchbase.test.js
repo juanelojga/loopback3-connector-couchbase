@@ -5,22 +5,16 @@ const should = require('should');
 const uuid = require('uuid/v4');
 const _ = require('lodash');
 
-// TODO: Replace with deleteAll method
-const couchbase = require('couchbase');
-const cluster = new couchbase.Cluster('localhost:8091');
-const n1qlQuery = couchbase.N1qlQuery;
-// End of couchbase
-
 const initialization = require("./init.js");
 const exampleData = require("./exampleData.js");
 
 describe('couchbase test cases', function() {
-  let db, countries, COUNTRY_MODEL, COUNTRY_MODEL_WITH_ID;
+  let db, countries, CountryModel, CountryModelWithId, StudentModel;
 
   before(function(done) {
     db = initialization.getDataSource();
     countries = exampleData.countries;
-    COUNTRY_MODEL = db.define('COUNTRY_MODEL', {
+    CountryModel = db.define('CountryModel', {
       gdp: Number,
       countryCode: String,
       name: String,
@@ -29,17 +23,22 @@ describe('couchbase test cases', function() {
     }, {
       forceId: false
     });
-    COUNTRY_MODEL_WITH_ID = db.define('COUNTRY_MODEL_WITH_ID', {
-      id: { type: String, id: true },
+    CountryModelWithId = db.define('CountryModelWithId', {
+      id: {type: String, id: true},
       gdp: Number,
       countryCode: String,
       name: String,
       population: Number,
       updatedAt: Date
     });
+    StudentModel = db.define('StudentModel', {
+      name: {type: String, length: 255},
+      age: {type: Number}
+    }, {
+      forceId: false
+    });
 
     deleteAllModelInstances();
-
     done();
   });
 
@@ -60,7 +59,7 @@ describe('couchbase test cases', function() {
 
   describe('create document', function() {
     it('create a document and generate an id', function(done) {
-      COUNTRY_MODEL.create(countries[0], function(err, res) {
+      CountryModel.create(countries[0], function(err, res) {
         verifyCountryRows(err, res);
         done();
       });
@@ -71,7 +70,7 @@ describe('couchbase test cases', function() {
 
       let newCountry = _.omit(countries[0]);
       newCountry.id = id;
-      COUNTRY_MODEL_WITH_ID.create(newCountry, function(err, res) {
+      CountryModelWithId.create(newCountry, function(err, res) {
         should.not.exists(err);
         assert.equal(res.id, id);
         verifyCountryRows(err, res);
@@ -83,7 +82,7 @@ describe('couchbase test cases', function() {
       const id = uuid();
 
       let newCountry = _.omit(countries[0]);
-      COUNTRY_MODEL_WITH_ID.create(newCountry, function(err, res) {
+      CountryModelWithId.create(newCountry, function(err, res) {
         should.not.exists(err);
         should.exist(res && res.id);
         verifyCountryRows(err, res);
@@ -96,9 +95,9 @@ describe('couchbase test cases', function() {
     let country, countryId;
 
     beforeEach(function(done) {
-        COUNTRY_MODEL_WITH_ID.create(countries[1], function(err, res) {
+        CountryModelWithId.create(countries[1], function(err, res) {
           country = res;
-          countryId = 'COUNTRY_MODEL::' + res.id;
+          countryId = 'CountryModel::' + res.id;
           done();
         })
     });
@@ -115,7 +114,7 @@ describe('couchbase test cases', function() {
 
     it('upsert a document', function(done) {
       //let newCountry = _.omit(countries[2], ['gdp', 'population']);
-      let newCountry = new COUNTRY_MODEL_WITH_ID(countries[2]);
+      let newCountry = new CountryModelWithId(countries[2]);
       should.not.exist(newCountry.id);
       newCountry.save(function(err, instance) {
         should.exist(instance.id);
@@ -143,30 +142,32 @@ describe('couchbase test cases', function() {
 
   describe('find document', function() {
     beforeEach(function(done) {
-      COUNTRY_MODEL_WITH_ID.destroyAll(done);
+      CountryModelWithId.destroyAll(done);
     });
 
     it('find all instances without filter', function(done) {
-      COUNTRY_MODEL_WITH_ID.create(countries[0], function(err, country) {
-        COUNTRY_MODEL_WITH_ID.create(countries[1], function(err, country) {
-          COUNTRY_MODEL_WITH_ID.find(function(err, response) {
-            should.not.exist(err);
-            response.length.should.be.equal(2);
-            done();
+      CountryModelWithId.create(countries[0], function(err, country) {
+        CountryModelWithId.create(countries[1], function(err, country) {
+          StudentModel.create({name: 'Juan Almeida', age: 30}, function(err, person) {
+            CountryModelWithId.find(function(err, response) {
+              should.not.exist(err);
+              response.length.should.be.equal(2);
+              done();
+            });
           });
         });
       });
     });
 
-    it('find one instance with limit and skip', function(done) {
-      COUNTRY_MODEL_WITH_ID.create(countries[0], function(err, country) {
-        COUNTRY_MODEL_WITH_ID.create(countries[1], function(err, country) {
-          COUNTRY_MODEL_WITH_ID.find({limit: 1, offset: 0}, function(err, response) {
+    /*it('find one instance with limit and skip', function(done) {
+      CountryModelWithId.create(countries[0], function(err, country) {
+        CountryModelWithId.create(countries[1], function(err, country) {
+          CountryModelWithId.find({limit: 1, offset: 0}, function(err, response) {
             should.not.exist(err);
             console.log('limit',response);
             response.length.should.be.equal(1);
           
-            COUNTRY_MODEL_WITH_ID.find({limit: 1, offset: 1}, function(err, response) {
+            CountryModelWithId.find({limit: 1, offset: 1}, function(err, response) {
               should.not.exist(err);
               console.log('offset',response);
               response.length.should.be.equal(1);
@@ -175,7 +176,7 @@ describe('couchbase test cases', function() {
           });
         });
       });
-    });
+    });*/
   });
 
   function deleteAllModelInstances() {
