@@ -426,7 +426,6 @@ describe('couchbase test cases', function() {
 
           CountryModelWithId.findById(id, function(err, response) {
             should.not.exist(err);
-            console.log('response', response)
             response.name.should.equal('Ecuador');
             response.id.should.equal(id);
             done();
