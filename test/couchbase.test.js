@@ -159,28 +159,46 @@ describe('couchbase test cases', function() {
       });
     });
 
-    /*it('find one instance with limit and skip', function(done) {
+    // TODO: Improve assertions
+    it('find one instance with limit and skip', function(done) {
       CountryModelWithId.create(countries[0], function(err, country) {
         CountryModelWithId.create(countries[1], function(err, country) {
-          CountryModelWithId.find({limit: 1, offset: 0}, function(err, response) {
-            should.not.exist(err);
-            console.log('limit',response);
-            response.length.should.be.equal(1);
-          
-            CountryModelWithId.find({limit: 1, offset: 1}, function(err, response) {
+          StudentModel.create({name: 'Juan Almeida', age: 30}, function(err, person) {
+            StudentModel.find({limit: 1, offset: 0}, function(err, response) {
               should.not.exist(err);
-              console.log('offset',response);
               response.length.should.be.equal(1);
+            
+              CountryModelWithId.find({limit: 1, offset: 1}, function(err, response) {
+                should.not.exist(err);
+                response.length.should.be.equal(1);
+                done();
+              });
+            });
+          });
+        });
+      });
+    });
+
+    it('retrieve only one field', function(done) {
+      CountryModelWithId.create(countries[0], function(err, country) {
+        CountryModelWithId.create(countries[1], function(err, country) {
+          StudentModel.create({name: 'Juan Almeida', age: 30}, function(err, person) {
+            CountryModelWithId.find({fields: ['name', 'population']}, function(err, response) {
+              should.not.exist(err);
+              response.length.should.be.equal(2);
+              should.exist(response[0].name);
+              should.exist(response[0].population);
+              should.not.exist(response[0].id);
               done();
             });
           });
         });
       });
-    });*/
+    });
   });
 
   function deleteAllModelInstances() {
-
+    CountryModelWithId.deleteAll();
   }
 
   after(function() {
