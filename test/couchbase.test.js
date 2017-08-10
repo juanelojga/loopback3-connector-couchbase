@@ -2,7 +2,7 @@
 
 const assert = require('assert');
 const should = require('should');
-const uuid = require('uuid/v4');
+const uuid = require('uuid/v1');
 const _ = require('lodash');
 
 const initialization = require("./init.js");
@@ -113,7 +113,6 @@ describe('couchbase test cases', function() {
     });
 
     it('upsert a document', function(done) {
-      //let newCountry = _.omit(countries[2], ['gdp', 'population']);
       let newCountry = new CountryModelWithId(countries[2]);
       should.not.exist(newCountry.id);
       newCountry.save(function(err, instance) {
@@ -297,9 +296,99 @@ describe('couchbase test cases', function() {
         });
       });
     });
+
+    describe('null vals in different operators', function() {
+      let defaultCountry = _.omit(exampleData.countries[0]);
+
+      it('should handle null in inq operator', function(done) {
+        let id = uuid();
+
+        defaultCountry.id = id;
+        defaultCountry.name = 'Ecuador';
+        defaultCountry.countryCode = 'EC';
+
+        CountryModelWithId.create(defaultCountry, function(err, response) {
+          should.not.exist(err);
+          response.id.should.equal(defaultCountry.id);
+
+          CountryModelWithId.find({where: {id: {inq: [null, id]}}}, function(err, response) {
+            should.not.exist(err);
+            response.length.should.equal(1);
+            response[0].name.should.equal('Ecuador');
+            response[0].id.should.equal(id);
+            done();
+          });
+        });
+      });
+
+      it('should handle null in nin operator', function(done) {
+        let id = uuid();
+
+        defaultCountry.id = id;
+        defaultCountry.name = 'Peru';
+        defaultCountry.countryCode = 'PE';
+
+        CountryModelWithId.create(defaultCountry, function(err, response) {
+          should.not.exist(err);
+          response.id.should.equal(defaultCountry.id);
+
+          CountryModelWithId.find({where: {id: {nin: [null, uuid()]}}}, function(err, response) {
+            should.not.exist(err);
+            response.length.should.equal(1);
+            response[0].name.should.equal('Peru');
+            response[0].id.should.equal(id);
+            done();
+          });
+        });
+      });
+
+      it('should handle null in neq operator', function(done) {
+        let id = uuid();
+
+        defaultCountry.id = id;
+        defaultCountry.name = 'Ecuador';
+        defaultCountry.countryCode = 'EC';
+
+        CountryModelWithId.create(defaultCountry, function(err, response) {
+          should.not.exist(err);
+          response.id.should.equal(defaultCountry.id);
+
+          CountryModelWithId.find({where: {id: {neq: null}}}, function(err, response) {
+            should.not.exist(err);
+            response.length.should.equal(1);
+            response[0].name.should.equal('Ecuador');
+            response[0].id.should.equal(id);
+            done();
+          });
+        });
+      });
+
+      it('should handle null in neq operator', function(done) {
+        let id = uuid();
+
+        defaultCountry.id = id;
+        defaultCountry.updatedAt = undefined;
+
+        CountryModelWithId.create(defaultCountry, function(err, response) {
+          should.not.exist(err);
+          response.id.should.equal(defaultCountry.id);
+
+          CountryModelWithId.find({where: {and: [
+              {id: {nin: [null]}},
+              {name: {nin: [null]}},
+              {countryCode: {nin: [null]}}
+            ]}}, function(err, response) {
+            should.not.exist(err);
+            response.length.should.equal(1);
+            done();
+          });
+        });
+      });
+    });
   });
 
   function deleteAllModelInstances() {
+    // TODO: Replace when deleteAll will be defined
     CountryModelWithId.deleteAll();
   }
 
