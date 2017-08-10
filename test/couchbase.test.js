@@ -245,6 +245,58 @@ describe('couchbase test cases', function() {
         });
       });
     });
+
+    it('should support "and" operator that is satisfied', function(done) {
+      CountryModel.create({name: 'Ecuador', countryCode: 'EC'}, function(err, country) {
+        CountryModel.find({where: {and: [
+          {name: 'Ecuador'},
+          {countryCode: 'EC'}
+        ]}}, function(err, response) {
+          should.not.exists(err);
+          response.should.have.property('length',1);
+          done();
+        });
+      });
+    });
+
+    it('should support "and" operator that is not satisfied', function(done) {
+      CountryModel.create({name: 'Ecuador', countryCode: 'EC'}, function(err, country) {
+        CountryModel.find({where: {and: [
+          {name: 'Ecuador'},
+          {countryCode: 'CO'}
+        ]}}, function(err, response) {
+          should.not.exists(err);
+          response.should.have.property('length',0);
+          done();
+        });
+      });
+    });
+
+    it('should support "or" operator that is satisfied', function(done) {
+      CountryModel.create({name: 'Ecuador', countryCode: 'EC'}, function(err, country) {
+        CountryModel.find({where: {or: [
+          {name: 'Ecuador'},
+          {countryCode: 'CO'}
+        ]}}, function(err, response) {
+          should.not.exists(err);
+          response.should.have.property('length',1);
+          done();
+        });
+      });
+    });
+
+    it('should support "or" operator that is not satisfied', function(done) {
+      CountryModel.create({name: 'Ecuador', countryCode: 'EC'}, function(err, country) {
+        CountryModel.find({where: {or: [
+          {name: 'Ecuador1'},
+          {countryCode: 'EC1'}
+        ]}}, function(err, response) {
+          should.not.exists(err);
+          response.should.have.property('length',0);
+          done();
+        });
+      });
+    });
   });
 
   function deleteAllModelInstances() {
