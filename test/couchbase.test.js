@@ -385,6 +385,32 @@ describe('couchbase test cases', function() {
         });
       });
     });
+
+    describe('findById method', function() {
+      let defaultCountry = _.omit(exampleData.countries[1]);
+
+      it('should return one document', function(done) {
+        let id = uuid();
+
+        defaultCountry.id = id;
+        defaultCountry.name = 'Ecuador';
+        defaultCountry.countryCode = 'EC';
+
+        CountryModelWithId.create(defaultCountry, function(err, response) {
+          should.not.exist(err);
+          response.id.should.equal(defaultCountry.id);
+
+          CountryModelWithId.findById(id, function(err, response) {
+            should.not.exist(err);
+            console.log('response',response)
+            /*response.length.should.equal(1);
+            response[0].name.should.equal('Ecuador');
+            response[0].id.should.equal(id);*/
+            done();
+          });
+        });
+      });
+    });
   });
 
   function deleteAllModelInstances() {
