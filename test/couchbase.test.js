@@ -90,54 +90,6 @@ describe('couchbase test cases', function() {
     });
   });
 
-  describe('update document', function() {
-    let country, countryId;
-
-    beforeEach(function(done) {
-        CountryModelWithId.create(countries[1], function(err, res) {
-          country = res;
-          countryId = 'CountryModel::' + res.id;
-          done();
-        })
-    });
-
-    it('update a document', function(done) {
-      let newCountry = _.omit(countries[2], 'population');
-      country.updateAttributes(newCountry, function(err, res) {
-        should.not.exists(err);
-        should.exist(res && res.id);
-        verifyCountryRows(err, res);
-        done();
-      })
-    });
-
-    it('upsert a document', function(done) {
-      let newCountry = new CountryModelWithId(countries[2]);
-      should.not.exist(newCountry.id);
-      newCountry.save(function(err, instance) {
-        should.exist(instance.id);
-        should.exist(newCountry.id);
-        //verifyCountryRows(err, instance);
-        done();
-      });
-    });
-
-    // TODO: find an object by id an update id
-    // Person.findOne(function(err, p) {
-        //   if (err) return done(err);
-        //   p.name = 'Hans';
-        //   p.save(function(err) {
-        //     if (err) return done(err);
-        //     p.name.should.equal('Hans');
-        //     Person.findOne(function(err, p) {
-        //       if (err) return done(err);
-        //       p.name.should.equal('Hans');
-        //       done();
-        //     });
-        //   });
-        // });
-  });
-
   describe('find document', function() {
     beforeEach(function(done) {
       deleteAllModelInstances(done);
@@ -539,6 +491,90 @@ describe('couchbase test cases', function() {
         });
       });
     });
+  });
+
+  describe('update document', function() {
+    let country, countryId;
+
+    beforeEach(function(done) {
+      deleteAllModelInstances(done);
+    });
+
+    it('updateAttributes of a document', function(done) {
+      const id = uuid();
+
+      CountryModelWithId.create(
+        {id: id, name: 'Panama', countryCode: 'PA'}, 
+        function(err, country) {
+          should.not.exists(err);
+          country.name.should.be.equal('Panama');
+          country.countryCode.should.be.equal('PA');
+          
+          country.updateAttributes(
+            {name: 'Ecuador', countryCode: 'EC'},
+            function(err, response) {
+              should.not.exists(err);
+              response.name.should.be.equal('Ecuador');
+              response.countryCode.should.be.equal('EC');
+
+              CountryModelWithId.findById(id, function(err, response) {
+                should.not.exists(err);
+                response.name.should.be.equal('Ecuador');
+                response.countryCode.should.be.equal('EC');
+                done();
+              });
+          });
+      });
+    });
+
+    it('updateAttribute of a document', function(done) {
+      const id = uuid();
+
+      CountryModelWithId.create(
+        {id: id, name: 'Panama', countryCode: 'PA'}, 
+        function(err, country) {
+          should.not.exists(err);
+          country.name.should.be.equal('Panama');
+          country.countryCode.should.be.equal('PA');
+          
+          CountryModelWithId.findById(id, function(err, country) {
+            should.not.exists(err);
+            country.updateAttribute('name', 'Ecuador', function(err, response) {
+              should.not.exists(err);
+              response.id.should.be.equal(id);
+              response.name.should.be.equal('Ecuador');
+              response.countryCode.should.be.equal('PA');
+              done();
+            });
+          });
+        });
+      });
+
+    // it('upsert a document', function(done) {
+    //   let newCountry = new CountryModelWithId(countries[2]);
+    //   should.not.exist(newCountry.id);
+    //   newCountry.save(function(err, instance) {
+    //     should.exist(instance.id);
+    //     should.exist(newCountry.id);
+    //     //verifyCountryRows(err, instance);
+    //     done();
+    //   });
+    // });
+
+    // TODO: find an object by id an update id
+    // Person.findOne(function(err, p) {
+        //   if (err) return done(err);
+        //   p.name = 'Hans';
+        //   p.save(function(err) {
+        //     if (err) return done(err);
+        //     p.name.should.equal('Hans');
+        //     Person.findOne(function(err, p) {
+        //       if (err) return done(err);
+        //       p.name.should.equal('Hans');
+        //       done();
+        //     });
+        //   });
+        // });
   });
 
   function deleteAllModelInstances(callback) {
