@@ -659,12 +659,99 @@ describe('couchbase test cases', function() {
             should.not.exists(err);
             response.id.should.be.equal(id);
             response.name.should.be.equal('Ecuador');
+            response.countryCode.should.be.equal('CO');
+            done();
+          });
+        });
+      });
+    });
+
+    it('create a document using replaceOrCreate', function(done) {
+      const id = uuid();
+
+      let newCountry = {
+        id: id,
+        name: 'Colombia',
+        countryCode: 'CO'
+      };
+
+      CountryModelWithId.findById(id, function(err, response) {
+        should.not.exists(err);
+        should.not.exist(response);
+
+        CountryModelWithId.replaceOrCreate(newCountry, function(err, instance) {
+          should.not.exists(err);
+
+          CountryModelWithId.findById(id, function(err, response) {
+            should.not.exists(err);
+            response.id.should.be.equal(id);
+            done();
+          });
+        });
+      });
+    });
+
+    it('update a document using replaceOrCreate', function(done) {
+      const id = uuid();
+
+      let newCountry = {
+        id: id,
+        name: 'Colombia',
+        countryCode: 'CO'
+      };
+
+      let updatedCountry = {
+        id: id,
+        name: 'Ecuador'
+      };
+
+      CountryModelWithId.create(newCountry, function(err, response) {
+        should.not.exists(err);
+
+        CountryModelWithId.replaceOrCreate(updatedCountry, function(err, instance) {
+          should.not.exists(err);
+console.log('instance',instance)
+          CountryModelWithId.findById(id, function(err, response) {
+            should.not.exists(err);
+            response.id.should.be.equal(id);
+            response.name.should.be.equal('Ecuador');
             should.not.exists(response.countryCode);
             done();
           });
         });
       });
     });
+
+    // it('update a document using replaceById', function(done) {
+    //   const id = uuid();
+
+    //   let newCountry = {
+    //     id: id,
+    //     name: 'Colombia',
+    //     countryCode: 'CO'
+    //   };
+
+    //   let updatedCountry = {
+    //     id: id,
+    //     name: 'Ecuador'
+    //   };
+
+    //   CountryModelWithId.create(newCountry, function(err, response) {
+    //     should.not.exists(err);
+
+    //     CountryModelWithId.replaceById(id, updatedCountry, function(err, instance) {
+    //       should.not.exists(err);
+
+    //       CountryModelWithId.findById(id, function(err, response) {
+    //         should.not.exists(err);
+    //         response.id.should.be.equal(id);
+    //         response.name.should.be.equal('Ecuador');
+    //         should.not.exists(response.countryCode);
+    //         done();
+    //       });
+    //     });
+    //   });
+    // });
   });
 
   function deleteAllModelInstances(callback) {
