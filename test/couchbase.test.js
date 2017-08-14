@@ -38,8 +38,8 @@ describe('couchbase test cases', function() {
       forceId: false
     });
 
-    deleteAllModelInstances();
-    done();
+    deleteAllModelInstances(done);
+    //done();
   });
 
   function verifyCountryRows(err, m) {
@@ -141,7 +141,7 @@ describe('couchbase test cases', function() {
 
   describe('find document', function() {
     beforeEach(function(done) {
-      CountryModelWithId.destroyAll(done);
+      deleteAllModelInstances(done);
     });
 
     it('find all instances without filter', function(done) {
@@ -477,9 +477,52 @@ describe('couchbase test cases', function() {
     });
   });
 
-  function deleteAllModelInstances() {
-    // TODO: Replace when deleteAll will be defined
-    CountryModelWithId.deleteAll();
+  describe('delete document', function() {
+    beforeEach(function(done) {
+      CountryModelWithId.destroyAll(done);
+    });
+
+    it('deleteAll model instances without filter', function(done) {
+      CountryModelWithId.create(countries[0], function(err, country) {
+        CountryModelWithId.create(countries[1], function(err, country) {
+          StudentModel.create({name: 'Juan Almeida', age: 30}, function(err, person) {
+            CountryModelWithId.destroyAll(function(err, response) {
+              should.not.exist(err);
+
+              StudentModel.count(function(err, studentsNumber) {
+                should.not.exist(err);
+                studentsNumber.should.be.equal(1);
+
+                CountryModelWithId.count(function(err, countriesNumber) {
+                  should.not.exist(err);
+                  countriesNumber.should.be.equal(0);
+                  done();
+                })
+              })
+            });
+          });
+        });
+      });
+    });
+  });
+
+  function deleteAllModelInstances(callback) {
+    const models = [
+      CountryModel, CountryModelWithId, StudentModel
+    ];
+    return Promise.all(models.map((m) => {
+      return new Promise(function(resolve,reject) {
+        m.destroyAll(function(err, res) {
+          if (err) {
+            reject(err);
+          } else {
+            resolve();
+          }
+        });
+      })
+    }))
+    .then(() => callback(null, true))
+    .catch(err => callback(err));
   }
 
   after(function() {
