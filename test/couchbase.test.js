@@ -39,7 +39,6 @@ describe('couchbase test cases', function() {
     });
 
     deleteAllModelInstances(done);
-    //done();
   });
 
   function verifyCountryRows(err, m) {
