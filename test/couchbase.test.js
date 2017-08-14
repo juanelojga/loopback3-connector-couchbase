@@ -550,31 +550,121 @@ describe('couchbase test cases', function() {
         });
       });
 
-    // it('upsert a document', function(done) {
-    //   let newCountry = new CountryModelWithId(countries[2]);
-    //   should.not.exist(newCountry.id);
-    //   newCountry.save(function(err, instance) {
-    //     should.exist(instance.id);
-    //     should.exist(newCountry.id);
-    //     //verifyCountryRows(err, instance);
-    //     done();
-    //   });
-    // });
+    it('create a document using save', function(done) {
+      const id = uuid();
 
-    // TODO: find an object by id an update id
-    // Person.findOne(function(err, p) {
-        //   if (err) return done(err);
-        //   p.name = 'Hans';
-        //   p.save(function(err) {
-        //     if (err) return done(err);
-        //     p.name.should.equal('Hans');
-        //     Person.findOne(function(err, p) {
-        //       if (err) return done(err);
-        //       p.name.should.equal('Hans');
-        //       done();
-        //     });
-        //   });
-        // });
+      let newCountry = new CountryModelWithId({
+        id: id,
+        name: 'Colombia',
+        countryCode: 'CO'
+      });
+
+      CountryModelWithId.findById(id, function(err, response) {
+        should.not.exists(err);
+        should.not.exist(response);
+
+        newCountry.save(function(err, instance) {
+          should.not.exists(err);
+          instance.id.should.be.equal(id);
+          instance.name.should.be.equal('Colombia');
+          instance.countryCode.should.be.equal('CO');
+
+          CountryModelWithId.findById(id, function(err, response) {
+            should.not.exists(err);
+            response.id.should.be.equal(id);
+            done();
+          });
+        });
+      });
+    });
+
+    it('update a document using save', function(done) {
+      const id = uuid();
+
+      CountryModelWithId.create({
+        id: id,
+        name: 'Argentina',
+        countryCode: 'AR'
+      }, function (err, response) {
+        should.not.exists(err);
+
+        CountryModelWithId.findOne({
+          where: {id: id}
+        }, function(err, country) {
+          should.not.exists(err);
+
+          country.countryCode = 'EC';
+          country.save(function(err, response) {
+            should.not.exists(err);
+
+            CountryModelWithId.findById(id, function(err, response) {
+              should.not.exists(err);
+
+              response.id.should.be.equal(id);
+              response.name.should.be.equal('Argentina');
+              response.countryCode.should.be.equal('EC');
+              done();
+            })
+          })
+        })
+      })
+    });
+
+    it('create a document using updateOrCreate', function(done) {
+      const id = uuid();
+
+      let newCountry = {
+        id: id,
+        name: 'Colombia',
+        countryCode: 'CO'
+      };
+
+      CountryModelWithId.findById(id, function(err, response) {
+        should.not.exists(err);
+        should.not.exist(response);
+
+        CountryModelWithId.updateOrCreate(newCountry, function(err, instance) {
+          should.not.exists(err);
+
+          CountryModelWithId.findById(id, function(err, response) {
+            should.not.exists(err);
+            response.id.should.be.equal(id);
+            done();
+          });
+        });
+      });
+    });
+
+    it('update a document using updateOrCreate', function(done) {
+      const id = uuid();
+
+      let newCountry = {
+        id: id,
+        name: 'Colombia',
+        countryCode: 'CO'
+      };
+
+      let updatedCountry = {
+        id: id,
+        name: 'Ecuador'
+      };
+
+      CountryModelWithId.create(newCountry, function(err, response) {
+        should.not.exists(err);
+
+        CountryModelWithId.updateOrCreate(updatedCountry, function(err, instance) {
+          should.not.exists(err);
+
+          CountryModelWithId.findById(id, function(err, response) {
+            should.not.exists(err);
+            response.id.should.be.equal(id);
+            response.name.should.be.equal('Ecuador');
+            should.not.exists(response.countryCode);
+            done();
+          });
+        });
+      });
+    });
   });
 
   function deleteAllModelInstances(callback) {
