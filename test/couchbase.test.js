@@ -38,8 +38,7 @@ describe('couchbase test cases', function() {
       forceId: false
     });
 
-    deleteAllModelInstances();
-    done();
+    deleteAllModelInstances(done);
   });
 
   function verifyCountryRows(err, m) {
@@ -141,7 +140,7 @@ describe('couchbase test cases', function() {
 
   describe('find document', function() {
     beforeEach(function(done) {
-      CountryModelWithId.destroyAll(done);
+      deleteAllModelInstances(done);
     });
 
     it('find all instances without filter', function(done) {
@@ -477,9 +476,88 @@ describe('couchbase test cases', function() {
     });
   });
 
-  function deleteAllModelInstances() {
-    // TODO: Replace when deleteAll will be defined
-    CountryModelWithId.deleteAll();
+  describe('delete document', function() {
+    beforeEach(function(done) {
+      deleteAllModelInstances(done);
+    });
+
+    it('deleteAll model instances without filter', function(done) {
+      CountryModelWithId.create(countries[0], function(err, country) {
+        CountryModelWithId.create(countries[1], function(err, country) {
+          StudentModel.create({name: 'Juan Almeida', age: 30}, function(err, person) {
+            CountryModelWithId.destroyAll(function(err) {
+              should.not.exist(err);
+
+              StudentModel.count(function(err, studentsNumber) {
+                should.not.exist(err);
+                studentsNumber.should.be.equal(1);
+
+                CountryModelWithId.count(function(err, countriesNumber) {
+                  should.not.exist(err);
+                  countriesNumber.should.be.equal(0);
+                  done();
+                })
+              })
+            });
+          });
+        });
+      });
+    });
+
+    it('should support where for destroyAll', function(done) {
+      CountryModelWithId.create({name: 'Ecuador', countryCode: 'EC'}, function(err, country) {
+        CountryModelWithId.create({name: 'Peru', countryCode: 'PE'}, function(err, country) {
+          CountryModelWithId.destroyAll({and: [
+            {name: 'Ecuador'},
+            {countryCode: 'EC'}
+          ]}, function(err) {
+            should.not.exist(err);
+            CountryModelWithId.count(function(err, count) {
+              should.not.exist(err);
+              count.should.be.equal(1);
+              done();
+            });
+          });
+        });
+      });
+    });
+
+    it('should support destroyById', function(done) {
+      const id1 = uuid();
+      const id2 = uuid();
+
+      CountryModelWithId.create({id: id1, name: 'Ecuador', countryCode: 'EC'}, function(err, country) {
+        CountryModelWithId.create({id: id2, name: 'Peru', countryCode: 'PE'}, function(err, country) {
+          CountryModelWithId.destroyById(id1, function(err) {
+            should.not.exist(err);
+            CountryModelWithId.count(function(err, count) {
+              should.not.exist(err);
+              count.should.be.equal(1);
+              done();
+            });
+          });
+        });
+      });
+    });
+  });
+
+  function deleteAllModelInstances(callback) {
+    const models = [
+      CountryModel, CountryModelWithId, StudentModel
+    ];
+    return Promise.all(models.map((m) => {
+      return new Promise(function(resolve,reject) {
+        m.destroyAll(function(err) {
+          if (err) {
+            reject(err);
+          } else {
+            resolve();
+          }
+        });
+      })
+    }))
+    .then(() => callback(null, true))
+    .catch(err => callback(err));
   }
 
   after(function() {
