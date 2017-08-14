@@ -548,7 +548,7 @@ describe('couchbase test cases', function() {
             });
           });
         });
-      });
+    });
 
     it('create a document using save', function(done) {
       const id = uuid();
