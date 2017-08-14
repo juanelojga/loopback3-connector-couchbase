@@ -433,6 +433,48 @@ describe('couchbase test cases', function() {
         });
       });
     });
+
+    describe('exists method', function() {
+      let defaultCountry = _.omit(exampleData.countries[1]);
+
+      it('should return true because document exists', function(done) {
+        let id = uuid();
+
+        defaultCountry.id = id;
+        defaultCountry.name = 'Peru';
+        defaultCountry.countryCode = 'PE';
+
+        CountryModelWithId.create(defaultCountry, function(err, response) {
+          should.not.exist(err);
+          response.id.should.equal(defaultCountry.id);
+
+          CountryModelWithId.exists(id, function(err, response) {
+            should.not.exist(err);
+            response.should.be.true;
+            done();
+          });
+        });
+      });
+
+      it('should return false because document does not exists', function(done) {
+        let id = uuid();
+
+        defaultCountry.id = id;
+        defaultCountry.name = 'Peru';
+        defaultCountry.countryCode = 'PE';
+
+        CountryModelWithId.create(defaultCountry, function(err, response) {
+          should.not.exist(err);
+          response.id.should.equal(defaultCountry.id);
+
+          CountryModelWithId.exists(uuid(), function(err, response) {
+            should.not.exist(err);
+            response.should.be.false;
+            done();
+          });
+        });
+      });
+    });
   });
 
   function deleteAllModelInstances() {
