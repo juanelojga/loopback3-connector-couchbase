@@ -11,9 +11,9 @@ Before installing the connector module, make sure you've taken the appropriate s
 
 ### Running N1QL
 Before issuing queries against a Couchbase bucket, run the following command from the query command line to create a primary index on the bicket:
-
-  CREATE PRIMARY INDEX ON \`bucket-name\` USING GSI;
-
+```
+CREATE PRIMARY INDEX ON `bucket-name` USING GSI;
+```
 ## Connector settings
 
 The connector can be configured using the following settings from the data source:
