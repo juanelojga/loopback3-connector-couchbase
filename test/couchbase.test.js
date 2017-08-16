@@ -9,7 +9,7 @@ const initialization = require("./init.js");
 const exampleData = require("./exampleData.js");
 
 describe('couchbase test cases', function() {
-  let db, countries, CountryModel, CountryModelWithId, StudentModel;
+  let db, countries, CountryModel, CountryModelWithId, StudentModel, UserModel;
 
   before(function(done) {
     db = initialization.getDataSource();
@@ -34,6 +34,13 @@ describe('couchbase test cases', function() {
     StudentModel = db.define('StudentModel', {
       name: {type: String, length: 255},
       age: {type: Number}
+    }, {
+      forceId: false
+    });
+    UserModel = db.define('StudentModel', {
+      name: {type: String, length: 255},
+      email: {type: String, length: 255},
+      realm: {type: Boolean}
     }, {
       forceId: false
     });
@@ -85,6 +92,23 @@ describe('couchbase test cases', function() {
         should.not.exists(err);
         should.exist(res && res.id);
         verifyCountryRows(err, res);
+        done();
+      });
+    });
+
+    it('create a document that has a property named equal to a reserved word', function(done) {
+      const id = uuid();
+
+      UserModel.create({
+        name: 'Juan Almeida',
+        email: 'admin@admin.com',
+        realm: true
+      }, function(err, res) {
+        should.not.exists(err);
+        should.exist(res && res.id);
+        should.exist(res && res.name);
+        should.exist(res && res.email);
+        should.exist(res && res.realm);
         done();
       });
     });
@@ -243,6 +267,43 @@ describe('couchbase test cases', function() {
         ]}}, function(err, response) {
           should.not.exists(err);
           response.should.have.property('length',0);
+          done();
+        });
+      });
+    });
+
+    it('should support select a field named as a reserved word', function(done) {
+      UserModel.create({
+        name: 'Juan Almeida',
+        email: 'admin@admin.com',
+        realm: true
+      }, function(err, res) {
+        should.not.exists(err);
+
+        UserModel.findOne({
+          fields: ['name', 'realm']
+        }, function(err, user) {
+          should.not.exists(err);
+          user.should.have.property('name','Juan Almeida');
+          user.should.have.property('realm',true);
+          done();
+        });
+      });
+    });
+
+    it('should support find based on a field named as a reserved word', function(done) {
+      UserModel.create({
+        name: 'Juan Almeida',
+        email: 'admin@admin.com',
+        realm: true
+      }, function(err, res) {
+        should.not.exists(err);
+
+        UserModel.find({
+          where: {realm: true}
+        }, function(err, response) {
+          should.not.exists(err);
+          response.should.have.property('length',1);
           done();
         });
       });
@@ -474,6 +535,28 @@ describe('couchbase test cases', function() {
       });
     });
 
+    it('should support where for destroyAll with a reserved word', function(done) {
+      UserModel.create({
+        name: 'Juan Almeida',
+        email: 'admin@admin.com',
+        realm: true
+      }, function(err, response) {
+        should.not.exist(err);
+        
+        UserModel.destroyAll({
+          realm: true
+        }, function(err, response) {
+          should.not.exist(err);
+
+          UserModel.count(function(err, count) {
+            should.not.exist(err);
+            count.should.be.equal(0);
+            done();
+          });
+        });
+      });
+    });
+
     it('should support destroyById', function(done) {
       const id1 = uuid();
       const id2 = uuid();
@@ -527,6 +610,30 @@ describe('couchbase test cases', function() {
       });
     });
 
+    it('updateAttributes of a document with a reserved word', function(done) {
+      UserModel.create({
+        name: 'Juan Almeida',
+        email: 'admin@admin.com',
+        realm: true
+      }, function(err, user) {
+        should.not.exists(err);
+
+        user.updateAttributes({
+          realm: false
+        }, function(err, response) {
+          should.not.exists(err);
+
+          UserModel.findOne(function(err, user) {
+            should.not.exists(err);
+
+            user.name.should.be.equal('Juan Almeida');
+            user.realm.should.be.false;
+            done();
+          });
+        });
+      });      
+    });
+
     it('updateAttribute of a document', function(done) {
       const id = uuid();
 
@@ -578,6 +685,31 @@ describe('couchbase test cases', function() {
       });
     });
 
+    it('create a document with a reserved word using save', function(done) {
+      const id = uuid();
+
+      let newUser = new UserModel({
+        name: 'Jobsity',
+        email: 'admin@jobsity.io',
+        realm: true
+      });
+
+      newUser.save(function(err, instance) {
+        should.not.exists(err);
+
+        instance.name.should.be.equal('Jobsity');
+        instance.email.should.be.equal('admin@jobsity.io');
+        instance.realm.should.be.true;
+
+        UserModel.findOne(function(err, response) {
+          should.not.exists(err);
+          
+          response.realm.should.be.true;
+          done();
+        });
+      });
+    });
+
     it('update a document using save', function(done) {
       const id = uuid();
 
@@ -608,6 +740,35 @@ describe('couchbase test cases', function() {
           })
         })
       })
+    });
+
+    it('update a document with a reserved word using save', function(done) {
+      const id = uuid();
+
+      UserModel.create({
+        name: 'Juan Almeida',
+        email: 'admin@admin.com',
+        realm: true
+      }, function (err, response) {
+        should.not.exists(err);
+
+        UserModel.findOne(function(err, user) {
+          should.not.exists(err);
+
+          user.realm = false;
+          user.save(function(err, response) {
+            should.not.exists(err);
+
+            UserModel.findOne(function(err, response) {
+              should.not.exists(err);
+
+              response.name.should.be.equal('Juan Almeida');
+              response.realm.should.be.false;
+              done();
+            });
+          });
+        });
+      });
     });
 
     it('create a document using updateOrCreate', function(done) {
