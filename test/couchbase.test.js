@@ -55,7 +55,8 @@ describe('couchbase test cases', function() {
     MerchantModel = db.define('MerchantModel', {
       merchantId: {type: String, id: true},
       name: {type: String, length: 255},
-      countryId: String
+      countryId: String,
+      address: {type: [Object], required: false}
     });
 
     deleteAllModelInstances(done);
@@ -1001,6 +1002,66 @@ describe('couchbase test cases', function() {
           country.updatedAt.should.an.instanceOf(Date);
           done();
         });
+      });
+    });
+  });
+
+  describe('fields with date', function() {
+    beforeEach(function(done) {
+      deleteAllModelInstances(done);
+    });
+
+    it('date field should be an instance of Date Object', function(done) {
+      CountryModel.create({
+        name: 'Ecuador',
+        countryCode: 'EC',
+        updatedAt: '1990-05-21'
+      }, function(err, response) {
+        should.not.exists(err);
+
+        CountryModel.findOne(function(err, country) {
+          should.not.exists(err);
+
+          country.updatedAt.should.an.instanceOf(Date);
+          done();
+        });
+      });
+    });
+  });
+
+  describe('list of results to array', function() {
+    beforeEach(function(done) {
+      deleteAllModelInstances(done);
+    });
+
+    it('returns an array of results', function(done) {
+      MerchantModel.create({
+        name: 'Wallmart',
+        countryId: uuid(),
+        address: [
+          {city: 'Quito', phone: '298221'},
+          {city: 'Guayaquil', phone: '33253'}
+        ]
+      }, function(err, response) {
+        should.not.exists(err);
+
+        MerchantModel.create({
+          name: 'OpinionShield',
+          countryId: uuid(),
+          address: [
+            {city: 'Ambato', phone: '99857'},
+            {city: 'Cuenca', phone: '22588442'}
+          ]
+        }, function(err, response) {
+          should.not.exists(err);
+
+          MerchantModel.find(function(err, response) {
+            should.not.exists(err);
+console.log('response',response)
+            response[0].address.should.an.instanceOf(Array);
+            done();
+          })
+        })
       });
     });
   });
