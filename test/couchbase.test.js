@@ -975,11 +975,34 @@ describe('couchbase test cases', function() {
 
               count.should.be.equal(0);
               done();
-            })
+            });
           });
-        })
-      })
-    })
+        });
+      });
+    });
+  });
+
+  describe('fields with date', function() {
+    beforeEach(function(done) {
+      deleteAllModelInstances(done);
+    });
+
+    it('find by id a model with forceId true', function(done) {
+      CountryModel.create({
+        name: 'Ecuador',
+        countryCode: 'EC',
+        updatedAt: '1990-05-21'
+      }, function(err, response) {
+        should.not.exists(err);
+
+        CountryModel.findOne(function(err, country) {
+          should.not.exists(err);
+
+          country.updatedAt.should.an.instanceOf(Date);
+          done();
+        });
+      });
+    });
   });
 
   function deleteAllModelInstances(callback) {
