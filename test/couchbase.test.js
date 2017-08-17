@@ -1057,7 +1057,7 @@ describe('couchbase test cases', function() {
 
           MerchantModel.find(function(err, response) {
             should.not.exists(err);
-console.log('response',response)
+
             response[0].address.should.an.instanceOf(Array);
             done();
           })
