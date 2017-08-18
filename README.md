@@ -1,4 +1,4 @@
-# loopback3-connector-couchbase
+# loopback3-connector-couchbase (BETA)
 
 The Couchbase Connector module compatible with Loopback 3.
 This connector uses N1QL to perform queries.

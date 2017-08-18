@@ -9,7 +9,8 @@ const initialization = require("./init.js");
 const exampleData = require("./exampleData.js");
 
 describe('couchbase test cases', function() {
-  let db, countries, CountryModel, CountryModelWithId, StudentModel, UserModel;
+  let db, countries, CountryModel, CountryModelWithId,
+    StudentModel, UserModel, TeamModel, MerchantModel;
 
   before(function(done) {
     db = initialization.getDataSource();
@@ -37,12 +38,25 @@ describe('couchbase test cases', function() {
     }, {
       forceId: false
     });
-    UserModel = db.define('StudentModel', {
+    UserModel = db.define('UserModel', {
       name: {type: String, length: 255},
       email: {type: String, length: 255},
       realm: {type: Boolean}
     }, {
       forceId: false
+    });
+    TeamModel = db.define('TeamModel', {
+      name: {type: String, length: 255},
+      numberOfPlayers: {type: Number},
+      sport: {type: String}
+    }, {
+      forceId: true
+    });
+    MerchantModel = db.define('MerchantModel', {
+      merchantId: {type: String, id: true},
+      name: {type: String, length: 255},
+      countryId: String,
+      address: {type: [Object], required: false}
     });
 
     deleteAllModelInstances(done);
@@ -915,9 +929,148 @@ describe('couchbase test cases', function() {
     });
   });
 
+  describe('operations with id', function() {
+    beforeEach(function(done) {
+      deleteAllModelInstances(done);
+    });
+
+    it('find by id a model with forceId true', function(done) {
+      TeamModel.create({
+        name: 'Real Madrid',
+        numberOfPlayers: 22,
+        sport: 'soccer'
+      }, function(err, response) {
+        should.not.exists(err);
+
+        const id = response.id;
+        TeamModel.findById(id, function(err, team) {
+          should.not.exists(err);
+
+          team.id.should.be.equal(id);
+          done();
+        });
+      });
+    });
+
+    it('execute operations with a model with custom id', function(done) {
+      const id = uuid();
+      
+      MerchantModel.create({
+        merchantId: id,
+        name: 'McDonalds',
+        countryId: uuid()
+      }, function(err, response) {
+        should.not.exists(err);
+
+        MerchantModel.findById(id, function(err, merchant) {
+          should.not.exists(err);
+
+          merchant.merchantId.should.be.equal(id);
+          merchant.name.should.be.equal('McDonalds');
+          
+          MerchantModel.deleteById(id, function(err, response) {
+            should.not.exists(err);
+
+            MerchantModel.count(function(err, count) {
+              should.not.exists(err);
+
+              count.should.be.equal(0);
+              done();
+            });
+          });
+        });
+      });
+    });
+  });
+
+  describe('fields with date', function() {
+    beforeEach(function(done) {
+      deleteAllModelInstances(done);
+    });
+
+    it('find by id a model with forceId true', function(done) {
+      CountryModel.create({
+        name: 'Ecuador',
+        countryCode: 'EC',
+        updatedAt: '1990-05-21'
+      }, function(err, response) {
+        should.not.exists(err);
+
+        CountryModel.findOne(function(err, country) {
+          should.not.exists(err);
+
+          country.updatedAt.should.an.instanceOf(Date);
+          done();
+        });
+      });
+    });
+  });
+
+  describe('fields with date', function() {
+    beforeEach(function(done) {
+      deleteAllModelInstances(done);
+    });
+
+    it('date field should be an instance of Date Object', function(done) {
+      CountryModel.create({
+        name: 'Ecuador',
+        countryCode: 'EC',
+        updatedAt: '1990-05-21'
+      }, function(err, response) {
+        should.not.exists(err);
+
+        CountryModel.findOne(function(err, country) {
+          should.not.exists(err);
+
+          country.updatedAt.should.an.instanceOf(Date);
+          done();
+        });
+      });
+    });
+  });
+
+  describe('list of results to array', function() {
+    beforeEach(function(done) {
+      deleteAllModelInstances(done);
+    });
+
+    it('returns an array of results', function(done) {
+      MerchantModel.create({
+        name: 'Wallmart',
+        countryId: uuid(),
+        address: [
+          {city: 'Quito', phone: '298221'},
+          {city: 'Guayaquil', phone: '33253'}
+        ]
+      }, function(err, response) {
+        should.not.exists(err);
+
+        MerchantModel.create({
+          name: 'OpinionShield',
+          countryId: uuid(),
+          address: [
+            {city: 'Ambato', phone: '99857'},
+            {city: 'Cuenca', phone: '22588442'}
+          ]
+        }, function(err, response) {
+          should.not.exists(err);
+
+          MerchantModel.find(function(err, response) {
+            should.not.exists(err);
+
+            response[0].address.should.an.instanceOf(Array);
+            done();
+          })
+        })
+      });
+    });
+  });
+
   function deleteAllModelInstances(callback) {
     const models = [
-      CountryModel, CountryModelWithId, StudentModel
+      CountryModel, CountryModelWithId, 
+      StudentModel, TeamModel,
+      UserModel, MerchantModel
     ];
     return Promise.all(models.map((m) => {
       return new Promise(function(resolve,reject) {
