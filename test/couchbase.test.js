@@ -62,7 +62,10 @@ describe('couchbase test cases', function() {
     deleteAllModelInstances(done);
   });
 
-  function verifyCountryRows(err, m) {
+  
+
+  describe('create document', function() {
+    function verifyCountryRows(err, m) {
       should.not.exists(err);
       should.exist(m && m.id);
       should.exist(m && m.gdp);
@@ -77,7 +80,6 @@ describe('couchbase test cases', function() {
       m.updatedAt.should.be.type('object');
     }
 
-  describe('create document', function() {
     it('create a document and generate an id', function(done) {
       CountryModel.create(countries[0], function(err, res) {
         verifyCountryRows(err, res);
@@ -927,6 +929,26 @@ describe('couchbase test cases', function() {
         });
       });
     });
+
+    it('return affected documents number using updateAll', function(done) {
+      const id1 = uuid();
+
+      let newCountry1 = {
+        id: id1,
+        name: 'Colombia',
+        countryCode: 'CO'
+      };
+
+      CountryModelWithId.create(newCountry1, function(err, response) {
+        should.not.exists(err);
+
+        CountryModelWithId.updateAll({where: {id: id1}}, {name: 'My Country'}, function(err, response) {
+          should.not.exists(err);
+          response.count.should.be.equal(1);
+          done();
+        });
+      });
+    });
   });
 
   describe('operations with id', function() {
@@ -983,85 +1005,88 @@ describe('couchbase test cases', function() {
     });
   });
 
-  describe('fields with date', function() {
-    beforeEach(function(done) {
-      deleteAllModelInstances(done);
-    });
+  describe('cases with special datatypes', function() {
 
-    it('find by id a model with forceId true', function(done) {
-      CountryModel.create({
-        name: 'Ecuador',
-        countryCode: 'EC',
-        updatedAt: '1990-05-21'
-      }, function(err, response) {
-        should.not.exists(err);
+    describe('fields with date', function() {
+      beforeEach(function(done) {
+        deleteAllModelInstances(done);
+      });
 
-        CountryModel.findOne(function(err, country) {
+      it('find by id a model with forceId true', function(done) {
+        CountryModel.create({
+          name: 'Ecuador',
+          countryCode: 'EC',
+          updatedAt: '1990-05-21'
+        }, function(err, response) {
           should.not.exists(err);
 
-          country.updatedAt.should.an.instanceOf(Date);
-          done();
+          CountryModel.findOne(function(err, country) {
+            should.not.exists(err);
+
+            country.updatedAt.should.an.instanceOf(Date);
+            done();
+          });
         });
       });
     });
-  });
 
-  describe('fields with date', function() {
-    beforeEach(function(done) {
-      deleteAllModelInstances(done);
-    });
+    describe('fields with date', function() {
+      beforeEach(function(done) {
+        deleteAllModelInstances(done);
+      });
 
-    it('date field should be an instance of Date Object', function(done) {
-      CountryModel.create({
-        name: 'Ecuador',
-        countryCode: 'EC',
-        updatedAt: '1990-05-21'
-      }, function(err, response) {
-        should.not.exists(err);
-
-        CountryModel.findOne(function(err, country) {
+      it('date field should be an instance of Date Object', function(done) {
+        CountryModel.create({
+          name: 'Ecuador',
+          countryCode: 'EC',
+          updatedAt: '1990-05-21'
+        }, function(err, response) {
           should.not.exists(err);
 
-          country.updatedAt.should.an.instanceOf(Date);
-          done();
+          CountryModel.findOne(function(err, country) {
+            should.not.exists(err);
+
+            country.updatedAt.should.an.instanceOf(Date);
+            done();
+          });
         });
       });
     });
-  });
 
-  describe('list of results to array', function() {
-    beforeEach(function(done) {
-      deleteAllModelInstances(done);
-    });
+    describe('list of results to array', function() {
+      beforeEach(function(done) {
+        deleteAllModelInstances(done);
+      });
 
-    it('returns an array of results', function(done) {
-      MerchantModel.create({
-        name: 'Wallmart',
-        countryId: uuid(),
-        address: [
-          {city: 'Quito', phone: '298221'},
-          {city: 'Guayaquil', phone: '33253'}
-        ]
-      }, function(err, response) {
-        should.not.exists(err);
-
+      it('returns an array of results', function(done) {
         MerchantModel.create({
-          name: 'OpinionShield',
+          name: 'Wallmart',
           countryId: uuid(),
           address: [
-            {city: 'Ambato', phone: '99857'},
-            {city: 'Cuenca', phone: '22588442'}
+            {city: 'Quito', phone: '298221'},
+            {city: 'Guayaquil', phone: '33253'}
           ]
         }, function(err, response) {
           should.not.exists(err);
 
-          MerchantModel.find(function(err, response) {
+          MerchantModel.create({
+            name: 'OpinionShield',
+            countryId: uuid(),
+            address: [
+              {city: 'Ambato', phone: '99857'},
+              {city: 'Cuenca', phone: '22588442'}
+            ]
+          }, function(err, response) {
             should.not.exists(err);
 
-            response[0].address.should.an.instanceOf(Array);
-            done();
+            MerchantModel.find(function(err, response) {
+              should.not.exists(err);
+
+              response[0].address.should.an.instanceOf(Array);
+              done();
+            })
           })
-        })
+        });
       });
     });
   });

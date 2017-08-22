@@ -115,6 +115,8 @@ couchbase-cli bucket-create -c ${HOSTNAME}:8091 \
   --enable-flush=1 \
   -u ${USERNAME} -p ${PASSWORD}
 
+sleep 30
+
 echo "CREATE PRIMARY INDEX ON \`${BUCKET_NAME}\` USING GSI;" | cbq
 
 # Attach to couchbase entrypoint
