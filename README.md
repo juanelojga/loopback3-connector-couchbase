@@ -1,4 +1,4 @@
-# loopback3-connector-couchbase (BETA)
+# loopback-connector-couchbase
 
 The Couchbase Connector module compatible with Loopback 3.
 This connector uses N1QL to perform queries.
@@ -17,7 +17,7 @@ CREATE PRIMARY INDEX ON `bucket-name` USING GSI;
 ## Connector settings
 
 The connector can be configured using the following settings from the data source:
-* host  (default to 'localhost'): The host name or ip address of the Couchbase server.
+* host  (default to 'localhost'): The host name or ip address of the Couchbase server. It couldn't contain special characters.
 * port (default to 8091): The port number of the Couchbase server.
 * bucket: The bucket name.
 * password: The bucket password.
