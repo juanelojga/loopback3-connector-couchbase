@@ -930,9 +930,8 @@ describe('couchbase test cases', function() {
       });
     });
 
-    it('update documents using updateAll', function(done) {
+    it('return affected documents number using updateAll', function(done) {
       const id1 = uuid();
-      const id2 = uuid();
 
       let newCountry1 = {
         id: id1,
@@ -940,168 +939,157 @@ describe('couchbase test cases', function() {
         countryCode: 'CO'
       };
 
-      let newCountry2 = {
-        id: id2,
-        name: 'Ecuador',
-        countryCode: 'CO'
-      };
-
       CountryModelWithId.create(newCountry1, function(err, response) {
         should.not.exists(err);
 
-        CountryModelWithId.create(newCountry2, function(err, response) {
-        should.not.exists(err);
-
-          CountryModelWithId.updateAll({where: {countryCode: 'CO'}}, {name: 'My Country'}, function(err, response) {
-            should.not.exists(err);
-            console.log('response',response)
-            response.count.should.be.equal(2);
-          });
-
+        CountryModelWithId.updateAll({where: {id: id1}}, {name: 'My Country'}, function(err, response) {
+          should.not.exists(err);
+          response.count.should.be.equal(1);
+          done();
         });
       });
     });
   });
 
-  // describe('operations with id', function() {
-  //   beforeEach(function(done) {
-  //     deleteAllModelInstances(done);
-  //   });
+  describe('operations with id', function() {
+    beforeEach(function(done) {
+      deleteAllModelInstances(done);
+    });
 
-  //   it('find by id a model with forceId true', function(done) {
-  //     TeamModel.create({
-  //       name: 'Real Madrid',
-  //       numberOfPlayers: 22,
-  //       sport: 'soccer'
-  //     }, function(err, response) {
-  //       should.not.exists(err);
+    it('find by id a model with forceId true', function(done) {
+      TeamModel.create({
+        name: 'Real Madrid',
+        numberOfPlayers: 22,
+        sport: 'soccer'
+      }, function(err, response) {
+        should.not.exists(err);
 
-  //       const id = response.id;
-  //       TeamModel.findById(id, function(err, team) {
-  //         should.not.exists(err);
+        const id = response.id;
+        TeamModel.findById(id, function(err, team) {
+          should.not.exists(err);
 
-  //         team.id.should.be.equal(id);
-  //         done();
-  //       });
-  //     });
-  //   });
+          team.id.should.be.equal(id);
+          done();
+        });
+      });
+    });
 
-  //   it('execute operations with a model with custom id', function(done) {
-  //     const id = uuid();
+    it('execute operations with a model with custom id', function(done) {
+      const id = uuid();
       
-  //     MerchantModel.create({
-  //       merchantId: id,
-  //       name: 'McDonalds',
-  //       countryId: uuid()
-  //     }, function(err, response) {
-  //       should.not.exists(err);
+      MerchantModel.create({
+        merchantId: id,
+        name: 'McDonalds',
+        countryId: uuid()
+      }, function(err, response) {
+        should.not.exists(err);
 
-  //       MerchantModel.findById(id, function(err, merchant) {
-  //         should.not.exists(err);
+        MerchantModel.findById(id, function(err, merchant) {
+          should.not.exists(err);
 
-  //         merchant.merchantId.should.be.equal(id);
-  //         merchant.name.should.be.equal('McDonalds');
+          merchant.merchantId.should.be.equal(id);
+          merchant.name.should.be.equal('McDonalds');
           
-  //         MerchantModel.deleteById(id, function(err, response) {
-  //           should.not.exists(err);
+          MerchantModel.deleteById(id, function(err, response) {
+            should.not.exists(err);
 
-  //           MerchantModel.count(function(err, count) {
-  //             should.not.exists(err);
+            MerchantModel.count(function(err, count) {
+              should.not.exists(err);
 
-  //             count.should.be.equal(0);
-  //             done();
-  //           });
-  //         });
-  //       });
-  //     });
-  //   });
-  // });
+              count.should.be.equal(0);
+              done();
+            });
+          });
+        });
+      });
+    });
+  });
 
-  // describe('cases with special datatypes', function() {
+  describe('cases with special datatypes', function() {
 
-  //   describe('fields with date', function() {
-  //     beforeEach(function(done) {
-  //       deleteAllModelInstances(done);
-  //     });
+    describe('fields with date', function() {
+      beforeEach(function(done) {
+        deleteAllModelInstances(done);
+      });
 
-  //     it('find by id a model with forceId true', function(done) {
-  //       CountryModel.create({
-  //         name: 'Ecuador',
-  //         countryCode: 'EC',
-  //         updatedAt: '1990-05-21'
-  //       }, function(err, response) {
-  //         should.not.exists(err);
+      it('find by id a model with forceId true', function(done) {
+        CountryModel.create({
+          name: 'Ecuador',
+          countryCode: 'EC',
+          updatedAt: '1990-05-21'
+        }, function(err, response) {
+          should.not.exists(err);
 
-  //         CountryModel.findOne(function(err, country) {
-  //           should.not.exists(err);
+          CountryModel.findOne(function(err, country) {
+            should.not.exists(err);
 
-  //           country.updatedAt.should.an.instanceOf(Date);
-  //           done();
-  //         });
-  //       });
-  //     });
-  //   });
+            country.updatedAt.should.an.instanceOf(Date);
+            done();
+          });
+        });
+      });
+    });
 
-  //   describe('fields with date', function() {
-  //     beforeEach(function(done) {
-  //       deleteAllModelInstances(done);
-  //     });
+    describe('fields with date', function() {
+      beforeEach(function(done) {
+        deleteAllModelInstances(done);
+      });
 
-  //     it('date field should be an instance of Date Object', function(done) {
-  //       CountryModel.create({
-  //         name: 'Ecuador',
-  //         countryCode: 'EC',
-  //         updatedAt: '1990-05-21'
-  //       }, function(err, response) {
-  //         should.not.exists(err);
+      it('date field should be an instance of Date Object', function(done) {
+        CountryModel.create({
+          name: 'Ecuador',
+          countryCode: 'EC',
+          updatedAt: '1990-05-21'
+        }, function(err, response) {
+          should.not.exists(err);
 
-  //         CountryModel.findOne(function(err, country) {
-  //           should.not.exists(err);
+          CountryModel.findOne(function(err, country) {
+            should.not.exists(err);
 
-  //           country.updatedAt.should.an.instanceOf(Date);
-  //           done();
-  //         });
-  //       });
-  //     });
-  //   });
+            country.updatedAt.should.an.instanceOf(Date);
+            done();
+          });
+        });
+      });
+    });
 
-  //   describe('list of results to array', function() {
-  //     beforeEach(function(done) {
-  //       deleteAllModelInstances(done);
-  //     });
+    describe('list of results to array', function() {
+      beforeEach(function(done) {
+        deleteAllModelInstances(done);
+      });
 
-  //     it('returns an array of results', function(done) {
-  //       MerchantModel.create({
-  //         name: 'Wallmart',
-  //         countryId: uuid(),
-  //         address: [
-  //           {city: 'Quito', phone: '298221'},
-  //           {city: 'Guayaquil', phone: '33253'}
-  //         ]
-  //       }, function(err, response) {
-  //         should.not.exists(err);
+      it('returns an array of results', function(done) {
+        MerchantModel.create({
+          name: 'Wallmart',
+          countryId: uuid(),
+          address: [
+            {city: 'Quito', phone: '298221'},
+            {city: 'Guayaquil', phone: '33253'}
+          ]
+        }, function(err, response) {
+          should.not.exists(err);
 
-  //         MerchantModel.create({
-  //           name: 'OpinionShield',
-  //           countryId: uuid(),
-  //           address: [
-  //             {city: 'Ambato', phone: '99857'},
-  //             {city: 'Cuenca', phone: '22588442'}
-  //           ]
-  //         }, function(err, response) {
-  //           should.not.exists(err);
+          MerchantModel.create({
+            name: 'OpinionShield',
+            countryId: uuid(),
+            address: [
+              {city: 'Ambato', phone: '99857'},
+              {city: 'Cuenca', phone: '22588442'}
+            ]
+          }, function(err, response) {
+            should.not.exists(err);
 
-  //           MerchantModel.find(function(err, response) {
-  //             should.not.exists(err);
+            MerchantModel.find(function(err, response) {
+              should.not.exists(err);
 
-  //             response[0].address.should.an.instanceOf(Array);
-  //             done();
-  //           })
-  //         })
-  //       });
-  //     });
-  //   });
-  // });
+              response[0].address.should.an.instanceOf(Array);
+              done();
+            })
+          })
+        });
+      });
+    });
+  });
 
   function deleteAllModelInstances(callback) {
     const models = [
