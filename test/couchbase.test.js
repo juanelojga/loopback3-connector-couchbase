@@ -34,7 +34,8 @@ describe('couchbase test cases', function() {
     });
     StudentModel = db.define('StudentModel', {
       name: {type: String, length: 255},
-      age: {type: Number}
+      age: {type: Number},
+      parents: {type: Object}
     }, {
       forceId: false
     });
@@ -61,8 +62,6 @@ describe('couchbase test cases', function() {
 
     deleteAllModelInstances(done);
   });
-
-  
 
   describe('create document', function() {
     function verifyCountryRows(err, m) {
@@ -949,6 +948,32 @@ describe('couchbase test cases', function() {
         });
       });
     });
+
+    it('update a document using upsertWithWhere', function(done) {
+      const id = uuid();
+
+      let newCountry = {
+        id: id,
+        name: 'Colombia',
+        countryCode: 'EC'
+      };
+
+      CountryModelWithId.create(newCountry, function(err, response) {
+        should.not.exists(err);
+
+        CountryModelWithId.upsertWithWhere({name: 'Colombia'}, {countryCode: 'CO'}, function(err, instance) {
+          should.not.exists(err);
+
+          CountryModelWithId.findById(id, function(err, response) {
+            should.not.exists(err);
+            response.id.should.be.equal(id);
+            response.name.should.be.equal('Colombia');
+            response.countryCode.should.be.equal('CO');
+            done();
+          });
+        });
+      });
+    });
   });
 
   describe('operations with id', function() {
@@ -1053,7 +1078,7 @@ describe('couchbase test cases', function() {
       });
     });
 
-    describe('list of results to array', function() {
+    describe('tests with special datatypes', function() {
       beforeEach(function(done) {
         deleteAllModelInstances(done);
       });
@@ -1084,11 +1109,36 @@ describe('couchbase test cases', function() {
 
               response[0].address.should.an.instanceOf(Array);
               done();
-            })
-          })
+            });
+          });
         });
       });
-    });
+
+      it('does not stringify object type field', function(done) {
+        StudentModel.create(
+          {
+            name: 'Juan Almeida',
+            age: 30,
+            parents: {
+              mother: {
+                name: 'Alexandra'
+              },
+              father: {
+                name: 'Patricio'
+              }
+            }
+          }, function(err, student) {
+            should.not.exists(err);
+            
+            StudentModel.findOne(function(err, response) {
+              should.not.exists(err);
+
+              response.parents.mother.name.should.be.equal('Alexandra');
+              done();
+            });
+          });
+      });
+    }); 
   });
 
   function deleteAllModelInstances(callback) {
