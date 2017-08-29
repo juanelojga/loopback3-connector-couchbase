@@ -5,6 +5,8 @@ const should = require('should');
 const uuid = require('uuid/v1');
 const _ = require('lodash');
 
+const GeoPoint = require('loopback-datasource-juggler').GeoPoint;
+
 const initialization = require("./init.js");
 const exampleData = require("./exampleData.js");
 
@@ -49,7 +51,9 @@ describe('couchbase test cases', function() {
     TeamModel = db.define('TeamModel', {
       name: {type: String, length: 255},
       numberOfPlayers: {type: Number},
-      sport: {type: String}
+      sport: {type: String},
+      image: {type: Buffer},
+      location: {type: GeoPoint}
     }, {
       forceId: true
     });
@@ -1114,6 +1118,23 @@ describe('couchbase test cases', function() {
         });
       });
 
+      it('returns an array of results', function(done) {
+        const address = ['Quito', 'Guayaquil']
+        MerchantModel.create({
+          name: 'Wallmart',
+          countryId: uuid(),
+          address: address
+        }, function(err, response) {
+          should.not.exists(err);
+
+          MerchantModel.find(function(err, response) {
+            should.not.exists(err);
+
+            done();
+          });
+        });
+      });
+
       it('does not stringify object type field', function(done) {
         StudentModel.create(
           {
@@ -1137,6 +1158,116 @@ describe('couchbase test cases', function() {
               done();
             });
           });
+      });
+
+      it('stores string and return string on object type field', function(done) {
+        StudentModel.create(
+          {
+            name: 'Juan Almeida',
+            age: 30,
+            parents: 'myparents'
+          }, function(err, student) {
+            should.not.exists(err);
+            
+            StudentModel.findOne(function(err, response) {
+              should.not.exists(err);
+
+              response.parents.should.be.equal('myparents');
+              done();
+            });
+          });
+      });
+
+      it('stores array and return array on object type field', function(done) {
+        let testArray = [
+          'item1',
+          2,
+          true,
+          'apple'
+        ];
+        StudentModel.create(
+          {
+            name: 'Juan Almeida',
+            age: 30,
+            parents: testArray
+          }, function(err, student) {
+            should.not.exists(err);
+            
+            StudentModel.findOne(function(err, response) {
+              should.not.exists(err);
+
+              response.parents.should.be.deepEqual(testArray);
+              done();
+            });
+          });
+      });
+
+      it('stores a buffer data type', function(done) {
+        const buffer = new Buffer(42);
+
+        TeamModel.create({
+          name: 'Real Madrid',
+          numberOfPlayers: 22,
+          sport: 'soccer',
+          image: buffer
+        }, function(err, response) {
+          should.not.exists(err);
+
+          const id = response.id;
+          TeamModel.findById(id, function(err, team) {
+            should.not.exists(err);
+
+            team.id.should.be.equal(id);
+            team.image.should.an.instanceOf(Buffer);
+            team.image.should.be.deepEqual(buffer);
+            done();
+          });
+        });
+      });
+
+      it('should always return a buffer object', function(done) {
+        TeamModel.create({
+          name: 'Real Madrid',
+          numberOfPlayers: 22,
+          sport: 'soccer',
+          image: 'MyImage.jpg'
+        }, function(err, response) {
+          should.not.exists(err);
+
+          const id = response.id;
+          TeamModel.findById(id, function(err, team) {
+            should.not.exists(err);
+
+            team.id.should.be.equal(id);
+            team.image.should.an.instanceOf(Buffer);
+            done();
+          });
+        });
+      });
+
+      it('should always return a geolocation object', function(done) {
+        const point = new GeoPoint({
+          lat: 31.230416,
+          lng: 121.473701,
+        });
+
+        TeamModel.create({
+          name: 'Real Madrid',
+          numberOfPlayers: 22,
+          sport: 'soccer',
+          location: point
+        }, function(err, response) {
+          should.not.exists(err);
+
+          const id = response.id;
+          TeamModel.findById(id, function(err, team) {
+            should.not.exists(err);
+
+            point.lat.should.be.equal(team.location.lat);
+            point.lng.should.be.equal(team.location.lng);
+            done();
+          });
+        });
       });
     }); 
   });
