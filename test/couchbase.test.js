@@ -49,7 +49,8 @@ describe('couchbase test cases', function() {
     TeamModel = db.define('TeamModel', {
       name: {type: String, length: 255},
       numberOfPlayers: {type: Number},
-      sport: {type: String}
+      sport: {type: String},
+      image: {type: Buffer}
     }, {
       forceId: true
     });
@@ -1114,6 +1115,23 @@ describe('couchbase test cases', function() {
         });
       });
 
+      it('returns an array of results', function(done) {
+        const address = ['Quito', 'Guayaquil']
+        MerchantModel.create({
+          name: 'Wallmart',
+          countryId: uuid(),
+          address: address
+        }, function(err, response) {
+          should.not.exists(err);
+
+          MerchantModel.find(function(err, response) {
+            should.not.exists(err);
+
+            done();
+          });
+        });
+      });
+
       it('does not stringify object type field', function(done) {
         StudentModel.create(
           {
@@ -1137,6 +1155,71 @@ describe('couchbase test cases', function() {
               done();
             });
           });
+      });
+
+      it('stores string and return string on object type field', function(done) {
+        StudentModel.create(
+          {
+            name: 'Juan Almeida',
+            age: 30,
+            parents: 'myparents'
+          }, function(err, student) {
+            should.not.exists(err);
+            
+            StudentModel.findOne(function(err, response) {
+              should.not.exists(err);
+
+              response.parents.should.be.equal('myparents');
+              done();
+            });
+          });
+      });
+
+      it('stores array and return array on object type field', function(done) {
+        let testArray = [
+          'item1',
+          2,
+          true,
+          'apple'
+        ];
+        StudentModel.create(
+          {
+            name: 'Juan Almeida',
+            age: 30,
+            parents: testArray
+          }, function(err, student) {
+            should.not.exists(err);
+            
+            StudentModel.findOne(function(err, response) {
+              should.not.exists(err);
+
+              response.parents.should.be.deepEqual(testArray);
+              done();
+            });
+          });
+      });
+
+      it.only('stores a buffer data type', function(done) {
+        const buffer = new Buffer(42);
+
+        TeamModel.create({
+          name: 'Real Madrid',
+          numberOfPlayers: 22,
+          sport: 'soccer',
+          image: buffer
+        }, function(err, response) {
+          should.not.exists(err);
+
+          const id = response.id;
+          TeamModel.findById(id, function(err, team) {
+            should.not.exists(err);
+
+            team.id.should.be.equal(id);
+            team.image.should.an.instanceOf(Buffer);
+            team.image.should.be.deepEqual(buffer);
+            done();
+          });
+        });
       });
     }); 
   });
