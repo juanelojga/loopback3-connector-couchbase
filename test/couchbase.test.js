@@ -11,6 +11,8 @@ const initialization = require("./init.js");
 const exampleData = require("./exampleData.js");
 
 describe('couchbase test cases', function() {
+  this.timeout(10000);
+
   let db, countries, CountryModel, CountryModelWithId,
     StudentModel, UserModel, TeamModel, MerchantModel;
 
@@ -1270,6 +1272,51 @@ describe('couchbase test cases', function() {
         });
       });
     }); 
+  });
+
+  describe('tests for updateDocumentExpiration method', function() {
+    beforeEach(function(done) {
+      deleteAllModelInstances(done);
+    });
+
+    it('should change default document expiry time', function(done) {
+      const id = uuid();
+      const documentKey = 'CountryModelWithId::' + id;
+      const expirationTime = 2;
+
+      let newCountry = {
+        id: id,
+        name: 'Colombia',
+        countryCode: 'CO'
+      };
+
+      CountryModelWithId.create(newCountry, function(err, response) {
+        should.not.exists(err);
+
+        CountryModelWithId.find(function(err, response) {
+          should.not.exists(err);
+          response.length.should.be.equal(1);
+
+          CountryModelWithId.getDataSource().connector
+          .updateDocumentExpiration(documentKey, expirationTime, {}, function (err, response) {
+            should.not.exists(err);
+
+            CountryModelWithId.find(function(err, response) {
+              should.not.exists(err);
+              response.length.should.be.equal(1);
+
+              setTimeout(function() {
+                CountryModelWithId.find(function(err, response) {
+                  should.not.exists(err);
+                  response.length.should.be.equal(0);
+                  done();
+                });
+              }, 3000);
+            });
+          });
+        });
+      });
+    });
   });
 
   function deleteAllModelInstances(callback) {
