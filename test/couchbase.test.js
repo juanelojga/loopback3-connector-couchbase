@@ -1279,7 +1279,7 @@ describe('couchbase test cases', function() {
       deleteAllModelInstances(done);
     });
 
-    it.only('should change default document expiry time', function(done) {
+    it('should change default document expiry time', function(done) {
       const id = uuid();
       const documentKey = 'CountryModelWithId::' + id;
       const expirationTime = 2;
