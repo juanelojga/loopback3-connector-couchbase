@@ -97,8 +97,12 @@ couchbase-cli user-manage -c ${HOSTNAME}:8091 -u ${WEB_USERNAME} -p ${WEB_PASSWO
 
 sleep 10
 
-numbered_echo "Create n1ql index for ${BUCKET_NAME}"
-echo "CREATE PRIMARY INDEX ON \`${BUCKET_NAME}\` USING GSI;" | cbq -u ${WEB_USERNAME} -p ${WEB_PASSWORD}
+numbered_echo "Create indexes on ${BUCKET_NAME}"
+cbq -u ${WEB_USERNAME} -p ${WEB_PASSWORD} \
+  -s "CREATE PRIMARY INDEX ON \`${BUCKET_NAME}\` USING GSI;" \
+  -s "CREATE INDEX idx_id ON \`${BUCKET_NAME}\`(id)" \
+  -s "CREATE INDEX idx_modelName ON \`${BUCKET_NAME}\`(modelName)" \
+  -s "\EXIT"
 
 # Attach to couchbase entrypoint
 numbered_echo "Attaching to couchbase-server entrypoint"
