@@ -330,6 +330,26 @@ describe('couchbase test cases', function() {
       });
     });
 
+    it('should support is missing operator', function(done) {
+      const countries = [
+        {name: 'Ecuador'},
+        {name: 'Colombia', countryCode: 'CO'}
+      ];
+      CountryModel.create(countries, function(err, res) {
+        should.not.exists(err);
+
+        CountryModel.find({
+          where: {countryCode: 'ismissing'}
+        }, function(err, response) {
+          should.not.exists(err);
+          console.log(response)
+          response.length.should.equal(1);
+          response[0].name.should.equal('Ecuador');
+          done();
+        });
+      });
+    });
+
     describe('null vals in different operators', function() {
       let defaultCountry = _.omit(exampleData.countries[0]);
 
