@@ -330,7 +330,7 @@ describe('couchbase test cases', function() {
       });
     });
 
-    it.only('should support is missing operator', function(done) {
+    it('should support is missing operator', function(done) {
       const countries = [
         {name: 'Ecuador'},
         {name: 'Colombia', countryCode: 'CO'}
@@ -339,7 +339,7 @@ describe('couchbase test cases', function() {
         should.not.exists(err);
 
         CountryModel.find({
-          where: {ismissing: 'countryCode'}
+          where: {countryCode: 'ismissing'}
         }, function(err, response) {
           should.not.exists(err);
           console.log(response)
