@@ -1,6 +1,6 @@
 # loopback-connector-couchbase
 
-The Couchbase Connector module compatible with Loopback 3.
+The Couchbase Connector module compatible with Loopback 3 and Couchbase 5.
 This connector uses N1QL to perform queries.
 
 ## What is N1QL
@@ -9,7 +9,7 @@ N1QL is a declarative query language that extends SQL for JSON. N1QL enables you
 
 ### Getting
 
-Before installing the connector module, make sure you've taken the appropriate steps to install and configure Couchbase Server and the N1QL Engine.
+Before installing the connector module, make sure you've taken the appropriate steps to install and configure Couchbase Server, the N1QL Engine and Role-Based Access Control (RBAC) access.
 
 ### Running N1QL
 
@@ -27,6 +27,8 @@ The connector can be configured using the following settings from the data sourc
 * port (default to 8091): The port number of the Couchbase server.
 * bucket: The bucket name.
 * password: The bucket password.
+* rbacUsername: Role-Based Access Control (RBAC) username.
+* rbacPassword: Role-Based Access Control (RBAC) password.
 
 ## Model definition for Couchbase Documents
 
