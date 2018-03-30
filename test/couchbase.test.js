@@ -211,6 +211,46 @@ describe('couchbase test cases', function() {
       });
     });
 
+    it('should allow to find using ilike', function(done) {
+      CountryModel.create({name: 'Ecuador', countryCode: 'EC'}, function(err, country) {
+        CountryModel.find({where: {name: {ilike: 'e%or'}}}, function(err, response) {
+          should.not.exists(err);
+          response.should.have.property('length',1);
+          done();
+        });
+      });
+    });
+
+    it('should allow to find using ilike case 2', function(done) {
+      CountryModel.create({name: 'Ecuador', countryCode: 'EC'}, function(err, country) {
+        CountryModel.find({where: {name: {ilike: 'E%or'}}}, function(err, response) {
+          should.not.exists(err);
+          response.should.have.property('length',1);
+          done();
+        });
+      });
+    });
+
+    it('should allow to find using ilike case 3', function(done) {
+      CountryModel.create({name: 'Ecuador', countryCode: 'EC'}, function(err, country) {
+        CountryModel.find({where: {name: {ilike: ''}}}, function(err, response) {
+          should.not.exists(err);
+          response.should.have.property('length',1);
+          done();
+        });
+      });
+    });
+
+    it('should allow to find using ilike case 4', function(done) {
+      CountryModel.create({name: 'Ecuador', countryCode: 'EC'}, function(err, country) {
+        CountryModel.find({where: {countryCode: {ilike: 'ECU'}}}, function(err, response) {
+          should.not.exists(err);
+          response.should.have.property('length',0);
+          done();
+        });
+      });
+    });
+
     it('should support like for no match', function(done) {
       CountryModel.create({name: 'Ecuador', countryCode: 'EC'}, function(err, country) {
         CountryModel.find({where: {name: {like: 'M%or'}}}, function(err, response) {
