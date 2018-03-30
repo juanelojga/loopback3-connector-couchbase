@@ -1,6 +1,6 @@
 {
   "name": "loopback3-connector-couchbase",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Couchbase connector for loopback-datasource-juggler",
   "engines": {
     "node": ">=4"
