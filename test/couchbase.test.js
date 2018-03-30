@@ -211,6 +211,17 @@ describe('couchbase test cases', function() {
       });
     });
 
+    it.only('should allow to find using ilike', function(done) {
+      CountryModel.create({name: 'Ecuador', countryCode: 'EC'}, function(err, country) {
+        CountryModel.find({where: {name: {ilike: 'e%or'}}}, function(err, response) {
+          should.not.exists(err);
+          console.log('response', response)
+          response.should.have.property('length',1);
+          done();
+        });
+      });
+    });
+
     it('should support like for no match', function(done) {
       CountryModel.create({name: 'Ecuador', countryCode: 'EC'}, function(err, country) {
         CountryModel.find({where: {name: {like: 'M%or'}}}, function(err, response) {
